@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://cdn.simpleicons.org/unity/ffffff\" -o \"d:/UnityDictionary/src/unity.svg\")",
+      "Bash(git checkout *)"
+    ]
+  }
+}
