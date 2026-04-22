@@ -1,0 +1,10 @@
+[
+  {
+    "id": "rigidbody-basics",
+    "title": "Rigidbody 基礎",
+    "chapter": 1,
+    "keywords": ["rigidbody", "physics", "force"],
+    "description": "介紹 Rigidbody 元件的基本用法，包含 AddForce 與重力設定。",
+    "youtubeId": "YOUTUBE_ID"
+  }
+]
