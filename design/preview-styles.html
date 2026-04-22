@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unity 字典 — 風格預覽 C D E F</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Chakra+Petch:wght@400;600&family=JetBrains+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600&family=Press+Start+2P&family=VT323&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Switcher UI ────────────────────────────────── */
+    #switcher {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+      display: flex; gap: 2px; background: #111;
+    }
+    #switcher button {
+      flex: 1; padding: 10px 0; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 700; letter-spacing: .05em;
+      transition: background .2s, color .2s;
+    }
+    #switcher button.c { background: #1a0a2e; color: #a855f7; }
+    #switcher button.d { background: #0d1b2a; color: #22c55e; }
+    #switcher button.e { background: #1a0a2e; color: #f43f5e; }
+    #switcher button.f { background: #2c1a00; color: #ca8a04; }
+    #switcher button.active { filter: brightness(2); outline: 2px solid currentColor; }
+
+    .theme { display: none; min-height: 100vh; padding-top: 44px; }
+    .theme.active { display: block; }
+
+    /* ── Shared card structure ───────────────────────── */
+    .site-wrap { min-height: 100vh; }
+    .site-header { padding: 24px 32px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .site-logo-badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; vertical-align: middle; margin-left: 8px; }
+    .search-bar { display: flex; align-items: center; gap: 8px; }
+    .search-bar input { padding: 8px 16px; border-radius: 6px; outline: none; width: 240px; font-size: 14px; }
+    .content-area { max-width: 1100px; margin: 0 auto; padding: 0 32px 48px; }
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 32px; }
+    .filter-btn { padding: 6px 16px; border-radius: 999px; font-size: 13px; cursor: pointer; border: none; transition: all .15s; }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .card { border-radius: 12px; overflow: hidden; }
+    .card-thumb { width: 100%; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+    .card-body { padding: 16px; }
+    .card-title { font-size: 16px; margin-bottom: 6px; }
+    .card-desc { font-size: 13px; line-height: 1.6; }
+    .card-tags { margin-top: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { font-size: 11px; padding: 2px 10px; border-radius: 4px; }
+
+    /* ═══════════════════════════════════════════════════
+       STYLE C — Cyberpunk UI
+    ═══════════════════════════════════════════════════ */
+    #theme-c { font-family: 'Chakra Petch', sans-serif; }
+    #theme-c .site-wrap {
+      background: #0F0F23;
+      color: #e2d9f3;
+      position: relative;
+      overflow: hidden;
+    }
+    #theme-c .site-wrap::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(124, 58, 237, 0.03) 2px, rgba(124, 58, 237, 0.03) 4px
+      );
+    }
+    #theme-c .site-header {
+      position: relative; z-index: 1;
+      border-bottom: 1px solid rgba(124,58,237,.4);
+      background: rgba(15,15,35,.8);
+      backdrop-filter: blur(8px);
+    }
+    #theme-c h1 {
+      font-family: 'Russo One', sans-serif;
+      font-size: 26px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #a78bfa;
+      text-shadow: 0 0 20px rgba(167,139,250,.6), 0 0 40px rgba(167,139,250,.3);
+    }
+    #theme-c .site-logo-badge {
+      background: rgba(244,63,94,.15);
+      color: #f43f5e;
+      border: 1px solid rgba(244,63,94,.4);
+      text-shadow: 0 0 8px rgba(244,63,94,.6);
+    }
+    #theme-c .search-bar input {
+      background: rgba(124,58,237,.1);
+      border: 1px solid rgba(124,58,237,.5);
+      color: #e2d9f3;
+      font-family: 'Chakra Petch', sans-serif;
+    }
+    #theme-c .search-bar input::placeholder { color: rgba(167,139,250,.5); }
+    #theme-c .content-area { position: relative; z-index: 1; }
+    #theme-c .filter-btn {
+      background: rgba(124,58,237,.1);
+      border: 1px solid rgba(124,58,237,.3);
+      color: #c4b5fd;
+    }
+    #theme-c .filter-btn.active, #theme-c .filter-btn:hover {
+      background: rgba(124,58,237,.3);
+      border-color: #7c3aed;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(124,58,237,.5);
+    }
+    #theme-c .card {
+      background: rgba(15,15,35,.7);
+      border: 1px solid rgba(124,58,237,.3);
+      box-shadow: 0 0 0 0 rgba(244,63,94,0);
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+    }
+    #theme-c .card:hover {
+      border-color: #f43f5e;
+      box-shadow: 0 0 20px rgba(244,63,94,.3), inset 0 0 20px rgba(244,63,94,.05);
+      transform: translateY(-2px);
+    }
+    #theme-c .card-thumb {
+      background: linear-gradient(135deg, rgba(124,58,237,.3), rgba(244,63,94,.2));
+      border-bottom: 1px solid rgba(124,58,237,.3);
+      position: relative;
+    }
+    #theme-c .card-thumb::after {
+      content: '▶ PLAY';
+      font-family: 'Russo One', sans-serif;
+      font-size: 11px;
+      color: #f43f5e;
+      letter-spacing: .15em;
+      text-shadow: 0 0 10px #f43f5e;
+      position: absolute; bottom: 8px; right: 10px;
+    }
+    #theme-c .card-title {
+      font-family: 'Russo One', sans-serif;
+      color: #c4b5fd;
+      letter-spacing: .04em;
+    }
+    #theme-c .card-desc { color: rgba(226,217,243,.65); }
+    #theme-c .tag {
+      background: rgba(244,63,94,.1);
+      border: 1px solid rgba(244,63,94,.3);
+      color: #f43f5e;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       STYLE D — Code Editor Dark
+    ═══════════════════════════════════════════════════ */
+    #theme-d { font-family: 'IBM Plex Sans', sans-serif; }
+    #theme-d .site-wrap {
+      background: #0F172A;
+      color: #cbd5e1;
+    }
+    #theme-d .site-header {
+      border-bottom: 1px solid #1e293b;
+      background: #0b1120;
+    }
+    #theme-d h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      color: #22c55e;
+      letter-spacing: -.01em;
+    }
+    #theme-d h1::before { content: '> '; color: #4ade80; opacity: .6; }
+    #theme-d h1::after  { content: '_'; animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    #theme-d .site-logo-badge {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(34,197,94,.1);
+      color: #22c55e;
+      border: 1px solid rgba(34,197,94,.25);
+      font-size: 10px;
+    }
+    #theme-d .search-bar input {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+    }
+    #theme-d .search-bar input::placeholder { color: #475569; }
+    #theme-d .search-bar input:focus { border-color: #22c55e; box-shadow: 0 0 0 2px rgba(34,197,94,.15); }
+    #theme-d .filter-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    #theme-d .filter-btn.active, #theme-d .filter-btn:hover {
+      background: rgba(34,197,94,.1);
+      border-color: #22c55e;
+      color: #22c55e;
+    }
+    #theme-d .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    #theme-d .card:hover {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34,197,94,.2);
+    }
+    #theme-d .card-thumb {
+      background: #0b1120;
+      border-bottom: 1px solid #1e293b;
+      position: relative;
+      font-size: 24px;
+    }
+    #theme-d .card-thumb::before {
+      content: '// VIDEO';
+      position: absolute; top: 10px; left: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: #475569; letter-spacing: .1em;
+    }
+    #theme-d .card-thumb .line-numbers {
+      position: absolute; left: 10px; bottom: 10px; top: 30px;
+      display: flex; flex-direction: column; gap: 2px;
+      font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #334155;
+    }
+    #theme-d .card-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      color: #e2e8f0;
+    }
+    #theme-d .card-title::before { content: 'fn '; color: #22c55e; }
+    #theme-d .card-desc { color: #64748b; }
+    #theme-d .card-desc::before { content: '// '; color: #334155; }
+    #theme-d .tag {
+      background: rgba(34,197,94,.08);
+      border: 1px solid rgba(34,197,94,.2);
+      color: #4ade80;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    #theme-d .tag::before { content: '#'; opacity: .5; }
+
+    /* ═══════════════════════════════════════════════════
+       STYLE E — Retro-Futurism / Synthwave
+    ═══════════════════════════════════════════════════ */
+    #theme-e { font-family: 'VT323', monospace; }
+    #theme-e .site-wrap {
+      background: #0F0F23;
+      color: #e2d9f3;
+      position: relative;
+      image-rendering: pixelated;
+    }
+    #theme-e .site-wrap::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,.15) 3px, rgba(0,0,0,.15) 4px
+      );
+    }
+    #theme-e .site-wrap::after {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at center top, rgba(124,58,237,.15) 0%, transparent 70%);
+    }
+    #theme-e .site-header {
+      position: relative; z-index: 1;
+      border-bottom: 2px solid #7c3aed;
+      background: rgba(15,15,35,.9);
+      box-shadow: 0 4px 20px rgba(124,58,237,.3);
+    }
+    #theme-e h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 18px;
+      color: #f43f5e;
+      text-shadow: 2px 2px 0 #7c3aed, 4px 4px 0 rgba(244,63,94,.3);
+      letter-spacing: .04em;
+    }
+    #theme-e .site-logo-badge {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      background: #f43f5e;
+      color: #0F0F23;
+      border: none;
+      image-rendering: pixelated;
+    }
+    #theme-e .search-bar input {
+      background: #0F0F23;
+      border: 2px solid #7c3aed;
+      color: #a78bfa;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      letter-spacing: .05em;
+    }
+    #theme-e .search-bar input::placeholder { color: rgba(124,58,237,.5); }
+    #theme-e .content-area { position: relative; z-index: 1; }
+    #theme-e .filter-btn {
+      background: transparent;
+      border: 2px solid #7c3aed;
+      color: #a78bfa;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      border-radius: 0;
+      image-rendering: pixelated;
+    }
+    #theme-e .filter-btn.active, #theme-e .filter-btn:hover {
+      background: #7c3aed;
+      color: #fff;
+      box-shadow: 0 0 12px rgba(124,58,237,.7);
+    }
+    #theme-e .card {
+      background: rgba(15,15,35,.8);
+      border: 2px solid #7c3aed;
+      border-radius: 0;
+      box-shadow: 4px 4px 0 rgba(244,63,94,.4);
+      transition: box-shadow .15s, transform .15s;
+    }
+    #theme-e .card:hover {
+      box-shadow: 6px 6px 0 #f43f5e, 0 0 20px rgba(124,58,237,.5);
+      transform: translate(-2px,-2px);
+    }
+    #theme-e .card-thumb {
+      background: #0a0a1a;
+      border-bottom: 2px solid #7c3aed;
+      position: relative;
+    }
+    #theme-e .card-thumb::before {
+      content: '▐▌';
+      font-size: 40px;
+      color: #f43f5e;
+      text-shadow: 0 0 16px rgba(244,63,94,.8);
+    }
+    #theme-e .card-thumb::after {
+      content: 'INSERT COIN';
+      position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%);
+      font-family: 'Press Start 2P', monospace; font-size: 7px;
+      color: #f43f5e; animation: flicker 1.4s ease-in-out infinite;
+      white-space: nowrap;
+    }
+    @keyframes flicker {
+      0%,95%,100%{opacity:1} 96%{opacity:0} 97%{opacity:1} 98%{opacity:0}
+    }
+    #theme-e .card-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 12px;
+      color: #a78bfa;
+      line-height: 1.6;
+    }
+    #theme-e .card-desc {
+      font-family: 'VT323', monospace;
+      font-size: 17px;
+      color: #c4b5fd;
+      letter-spacing: .04em;
+    }
+    #theme-e .tag {
+      background: rgba(244,63,94,.15);
+      border: 1px solid #f43f5e;
+      color: #f43f5e;
+      border-radius: 0;
+      font-family: 'VT323', monospace;
+      font-size: 14px;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       STYLE F — Dark Premium / RPG Gold
+    ═══════════════════════════════════════════════════ */
+    #theme-f { font-family: 'Inter', sans-serif; }
+    #theme-f .site-wrap {
+      background: #1C1917;
+      color: #d6d3d1;
+    }
+    #theme-f .site-header {
+      padding: 28px 32px 24px;
+      border-bottom: 1px solid rgba(202,138,4,.2);
+      background: linear-gradient(180deg, #0c0a09 0%, #1c1917 100%);
+      position: relative;
+    }
+    #theme-f .site-header::after {
+      content: '';
+      position: absolute; bottom: 0; left: 32px; right: 32px; height: 1px;
+      background: linear-gradient(90deg, transparent, #ca8a04, transparent);
+    }
+    #theme-f h1 {
+      font-family: 'Inter', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #fbbf24;
+      letter-spacing: .01em;
+    }
+    #theme-f .site-logo-badge {
+      background: rgba(202,138,4,.15);
+      color: #ca8a04;
+      border: 1px solid rgba(202,138,4,.35);
+      font-weight: 600;
+    }
+    #theme-f .search-bar input {
+      background: #0c0a09;
+      border: 1px solid rgba(202,138,4,.25);
+      color: #e7e5e4;
+      font-family: 'Inter', sans-serif;
+    }
+    #theme-f .search-bar input::placeholder { color: #57534e; }
+    #theme-f .search-bar input:focus {
+      border-color: rgba(202,138,4,.6);
+      box-shadow: 0 0 0 2px rgba(202,138,4,.1);
+    }
+    #theme-f .filter-btn {
+      background: transparent;
+      border: 1px solid #44403c;
+      color: #a8a29e;
+      font-weight: 500;
+    }
+    #theme-f .filter-btn.active, #theme-f .filter-btn:hover {
+      background: rgba(202,138,4,.12);
+      border-color: rgba(202,138,4,.5);
+      color: #fbbf24;
+    }
+    #theme-f .card {
+      background: #231f1c;
+      border: 1px solid #292524;
+      position: relative;
+      transition: border-color .2s, box-shadow .2s, transform .2s;
+    }
+    #theme-f .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(202,138,4,.4), transparent);
+      opacity: 0; transition: opacity .2s;
+    }
+    #theme-f .card:hover { border-color: rgba(202,138,4,.3); box-shadow: 0 4px 24px rgba(0,0,0,.5); transform: translateY(-1px); }
+    #theme-f .card:hover::before { opacity: 1; }
+    #theme-f .card-thumb {
+      background: linear-gradient(135deg, #0c0a09 0%, #1c1917 100%);
+      border-bottom: 1px solid #292524;
+      position: relative;
+    }
+    #theme-f .card-thumb::after {
+      content: '⚔';
+      position: absolute; bottom: 10px; right: 14px;
+      font-size: 18px; color: rgba(202,138,4,.4);
+    }
+    #theme-f .card-title {
+      font-weight: 600;
+      color: #e7e5e4;
+      font-size: 15px;
+    }
+    #theme-f .card-desc { color: #78716c; font-size: 13px; }
+    #theme-f .tag {
+      background: rgba(202,138,4,.08);
+      border: 1px solid rgba(202,138,4,.2);
+      color: #a16207;
+      font-size: 11px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Switcher -->
+<div id="switcher">
+  <button class="c active" onclick="switchTheme('c')">C — Cyberpunk UI</button>
+  <button class="d" onclick="switchTheme('d')">D — Code Editor Dark</button>
+  <button class="e" onclick="switchTheme('e')">E — Retro-Futurism</button>
+  <button class="f" onclick="switchTheme('f')">F — RPG Gold</button>
+</div>
+
+<!-- ═══════ THEME C ═══════ -->
+<div id="theme-c" class="theme active">
+  <div class="site-wrap">
+    <header class="site-header">
+      <div>
+        <h1>Unity 字典<span class="site-logo-badge">BETA</span></h1>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="搜尋概念..." />
+      </div>
+    </header>
+    <div class="content-area">
+      <div style="padding: 24px 0 16px; font-size: 12px; color: #6d28d9; font-family: 'Chakra Petch',sans-serif; letter-spacing: .1em;">
+        SYS // CATEGORY_SELECT
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active">ALL</button>
+        <button class="filter-btn">物理系統</button>
+        <button class="filter-btn">光照</button>
+        <button class="filter-btn">動畫</button>
+        <button class="filter-btn">腳本</button>
+        <button class="filter-btn">UI</button>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-thumb">🎮</div>
+          <div class="card-body">
+            <div class="card-title">Rigidbody 基礎</div>
+            <div class="card-desc">介紹 Rigidbody 元件的基本用法，包含 AddForce 與重力設定。</div>
+            <div class="card-tags">
+              <span class="tag">rigidbody</span><span class="tag">physics</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">💡</div>
+          <div class="card-body">
+            <div class="card-title">Global Illumination</div>
+            <div class="card-desc">Unity 的全域光照系統，讓場景光線更自然真實。</div>
+            <div class="card-tags">
+              <span class="tag">lighting</span><span class="tag">baked GI</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">🎬</div>
+          <div class="card-body">
+            <div class="card-title">Animator Controller</div>
+            <div class="card-desc">使用狀態機管理角色動畫切換，設定過渡條件與混合樹。</div>
+            <div class="card-tags">
+              <span class="tag">animation</span><span class="tag">state machine</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">🔧</div>
+          <div class="card-body">
+            <div class="card-title">Coroutine 協程</div>
+            <div class="card-desc">利用 IEnumerator 實作延遲執行與逐幀控制邏輯。</div>
+            <div class="card-tags">
+              <span class="tag">script</span><span class="tag">coroutine</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">🖼</div>
+          <div class="card-body">
+            <div class="card-title">Canvas UI 系統</div>
+            <div class="card-desc">Unity UI 基礎架構，了解 Canvas、RectTransform 與 Layout Group。</div>
+            <div class="card-tags">
+              <span class="tag">UI</span><span class="tag">canvas</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">🌊</div>
+          <div class="card-body">
+            <div class="card-title">Shader Graph 入門</div>
+            <div class="card-desc">使用節點式介面建立自訂 Shader，不需撰寫 HLSL 程式碼。</div>
+            <div class="card-tags">
+              <span class="tag">shader</span><span class="tag">visual</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ THEME D ═══════ -->
+<div id="theme-d" class="theme">
+  <div class="site-wrap">
+    <header class="site-header">
+      <div>
+        <h1>unity_dict<span class="site-logo-badge">v1.0</span></h1>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="// search entries..." />
+      </div>
+    </header>
+    <div class="content-area">
+      <div style="padding: 24px 0 4px; font-family: 'JetBrains Mono',monospace; font-size: 11px; color: #22c55e; letter-spacing: .06em;">
+        <span style="color:#475569">const</span> category = <span style="color:#22c55e">"全部"</span>;
+      </div>
+      <div style="height:1px; background:#1e293b; margin-bottom:16px;"></div>
+      <div class="filter-row">
+        <button class="filter-btn active">全部</button>
+        <button class="filter-btn">物理系統</button>
+        <button class="filter-btn">光照</button>
+        <button class="filter-btn">動畫</button>
+        <button class="filter-btn">腳本</button>
+        <button class="filter-btn">UI</button>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-thumb">
+            <div class="line-numbers">
+              <span>01</span><span>02</span><span>03</span><span>04</span><span>05</span>
+            </div>
+            🎮
+          </div>
+          <div class="card-body">
+            <div class="card-title">Rigidbody_基礎()</div>
+            <div class="card-desc">介紹 Rigidbody 元件的基本用法，包含 AddForce 與重力設定。</div>
+            <div class="card-tags">
+              <span class="tag">rigidbody</span><span class="tag">physics</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">
+            <div class="line-numbers"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></div>
+            💡
+          </div>
+          <div class="card-body">
+            <div class="card-title">GlobalIllumination()</div>
+            <div class="card-desc">Unity 的全域光照系統，讓場景光線更自然真實。</div>
+            <div class="card-tags">
+              <span class="tag">lighting</span><span class="tag">baked GI</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">
+            <div class="line-numbers"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></div>
+            🎬
+          </div>
+          <div class="card-body">
+            <div class="card-title">AnimatorController()</div>
+            <div class="card-desc">使用狀態機管理角色動畫切換，設定過渡條件與混合樹。</div>
+            <div class="card-tags">
+              <span class="tag">animation</span><span class="tag">state machine</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">
+            <div class="line-numbers"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></div>
+            🔧
+          </div>
+          <div class="card-body">
+            <div class="card-title">Coroutine_協程()</div>
+            <div class="card-desc">利用 IEnumerator 實作延遲執行與逐幀控制邏輯。</div>
+            <div class="card-tags">
+              <span class="tag">script</span><span class="tag">coroutine</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">
+            <div class="line-numbers"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></div>
+            🖼
+          </div>
+          <div class="card-body">
+            <div class="card-title">CanvasUI_系統()</div>
+            <div class="card-desc">Unity UI 基礎架構，了解 Canvas、RectTransform 與 Layout Group。</div>
+            <div class="card-tags">
+              <span class="tag">UI</span><span class="tag">canvas</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">
+            <div class="line-numbers"><span>01</span><span>02</span><span>03</span><span>04</span><span>05</span></div>
+            🌊
+          </div>
+          <div class="card-body">
+            <div class="card-title">ShaderGraph_入門()</div>
+            <div class="card-desc">使用節點式介面建立自訂 Shader，不需撰寫 HLSL 程式碼。</div>
+            <div class="card-tags">
+              <span class="tag">shader</span><span class="tag">visual</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ THEME E ═══════ -->
+<div id="theme-e" class="theme">
+  <div class="site-wrap">
+    <header class="site-header">
+      <div>
+        <h1>UNITY字典<span class="site-logo-badge">★NEW★</span></h1>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="SEARCH▌" />
+      </div>
+    </header>
+    <div class="content-area">
+      <div style="padding: 24px 0 12px; font-family: 'Press Start 2P',monospace; font-size: 8px; color: #7c3aed; letter-spacing: .15em;">
+        ▶ SELECT STAGE
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn active">ALL</button>
+        <button class="filter-btn">物理</button>
+        <button class="filter-btn">光照</button>
+        <button class="filter-btn">動畫</button>
+        <button class="filter-btn">腳本</button>
+        <button class="filter-btn">UI</button>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-thumb">▐▌</div>
+          <div class="card-body">
+            <div class="card-title">RIGIDBODY 基礎</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">介紹 Rigidbody 元件的基本用法，包含 AddForce 與重力設定。</div>
+            <div class="card-tags">
+              <span class="tag">RIGIDBODY</span><span class="tag">PHYSICS</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">▐▌</div>
+          <div class="card-body">
+            <div class="card-title">GLOBAL ILLUM.</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">Unity 的全域光照系統，讓場景光線更自然真實。</div>
+            <div class="card-tags">
+              <span class="tag">LIGHTING</span><span class="tag">GI</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">▐▌</div>
+          <div class="card-body">
+            <div class="card-title">ANIMATOR CTRL</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">使用狀態機管理角色動畫切換，設定過渡條件與混合樹。</div>
+            <div class="card-tags">
+              <span class="tag">ANIM</span><span class="tag">STATE</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">▐▌</div>
+          <div class="card-body">
+            <div class="card-title">COROUTINE 協程</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">利用 IEnumerator 實作延遲執行與逐幀控制邏輯。</div>
+            <div class="card-tags">
+              <span class="tag">SCRIPT</span><span class="tag">CORO</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">▐▌</div>
+          <div class="card-body">
+            <div class="card-title">CANVAS UI 系統</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">Unity UI 基礎架構，了解 Canvas、RectTransform 與 Layout Group。</div>
+            <div class="card-tags">
+              <span class="tag">UI</span><span class="tag">CANVAS</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb">▐▌</div>
+          <div class="card-body">
+            <div class="card-title">SHADER GRAPH</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">使用節點式介面建立自訂 Shader，不需撰寫 HLSL 程式碼。</div>
+            <div class="card-tags">
+              <span class="tag">SHADER</span><span class="tag">VFX</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════ THEME F ═══════ -->
+<div id="theme-f" class="theme">
+  <div class="site-wrap">
+    <header class="site-header">
+      <div>
+        <h1>⚔ Unity 字典<span class="site-logo-badge">第一章</span></h1>
+      </div>
+      <div class="search-bar">
+        <input type="text" placeholder="搜尋知識..." />
+      </div>
+    </header>
+    <div class="content-area">
+      <div style="padding: 24px 0 8px; font-size: 12px; color: #57534e; letter-spacing: .08em; text-transform: uppercase; font-weight: 600;">
+        分類
+      </div>
+      <div style="height:1px; background: linear-gradient(90deg, rgba(202,138,4,.3), transparent); margin-bottom:16px;"></div>
+      <div class="filter-row">
+        <button class="filter-btn active">全部</button>
+        <button class="filter-btn">物理系統</button>
+        <button class="filter-btn">光照</button>
+        <button class="filter-btn">動畫</button>
+        <button class="filter-btn">腳本</button>
+        <button class="filter-btn">UI</button>
+      </div>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-thumb" style="font-size:28px;">⚔</div>
+          <div class="card-body">
+            <div class="card-title">Rigidbody 基礎</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">介紹 Rigidbody 元件的基本用法，包含 AddForce 與重力設定。</div>
+            <div class="card-tags">
+              <span class="tag">rigidbody</span><span class="tag">physics</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb" style="font-size:28px;">🕯</div>
+          <div class="card-body">
+            <div class="card-title">Global Illumination</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">Unity 的全域光照系統，讓場景光線更自然真實。</div>
+            <div class="card-tags">
+              <span class="tag">lighting</span><span class="tag">baked GI</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb" style="font-size:28px;">🎭</div>
+          <div class="card-body">
+            <div class="card-title">Animator Controller</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">使用狀態機管理角色動畫切換，設定過渡條件與混合樹。</div>
+            <div class="card-tags">
+              <span class="tag">animation</span><span class="tag">state machine</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb" style="font-size:28px;">📜</div>
+          <div class="card-body">
+            <div class="card-title">Coroutine 協程</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">利用 IEnumerator 實作延遲執行與逐幀控制邏輯。</div>
+            <div class="card-tags">
+              <span class="tag">script</span><span class="tag">coroutine</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb" style="font-size:28px;">🗺</div>
+          <div class="card-body">
+            <div class="card-title">Canvas UI 系統</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">Unity UI 基礎架構，了解 Canvas、RectTransform 與 Layout Group。</div>
+            <div class="card-tags">
+              <span class="tag">UI</span><span class="tag">canvas</span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-thumb" style="font-size:28px;">✨</div>
+          <div class="card-body">
+            <div class="card-title">Shader Graph 入門</div>
+            <div style="height:8px;"></div>
+            <div class="card-desc">使用節點式介面建立自訂 Shader，不需撰寫 HLSL 程式碼。</div>
+            <div class="card-tags">
+              <span class="tag">shader</span><span class="tag">visual</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTheme(id) {
+    document.querySelectorAll('.theme').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('#switcher button').forEach(el => el.classList.remove('active'));
+    document.getElementById('theme-' + id).classList.add('active');
+    document.querySelector('#switcher button.' + id).classList.add('active');
+  }
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      this.closest('.filter-row').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
