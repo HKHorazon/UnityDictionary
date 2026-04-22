@@ -1,32 +1,9 @@
 <template>
-  <div :data-theme="theme" class="app-root">
+  <div data-theme="k" class="app-root">
     <header class="app-header px-5 py-3 flex items-center gap-3 flex-wrap relative">
 
-      <!-- Theme Dropdown -->
-      <div class="theme-picker" ref="pickerRef">
-        <button class="theme-picker-btn" @click="dropdownOpen = !dropdownOpen">
-          <span class="theme-dot" :class="`dot-${theme}`"></span>
-          {{ currentTheme.label }}
-          <svg class="theme-picker-chevron w-3.5 h-3.5 ml-1" :class="{ open: dropdownOpen }"
-            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-          </svg>
-        </button>
-        <div v-show="dropdownOpen" class="theme-picker-menu">
-          <button
-            v-for="t in themes" :key="t.id"
-            @click="selectTheme(t.id)"
-            :class="['theme-picker-item', { active: theme === t.id }]"
-          >
-            <span class="theme-dot" :class="`dot-${t.id}`"></span>
-            {{ t.label }}
-            <span class="theme-picker-item-desc">{{ t.desc }}</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Title -->
-      <h1 class="site-title text-lg font-bold absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+      <h1 class="site-title text-2xl font-bold absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
         <img :src="unityIcon" class="w-5 h-5 opacity-90" alt="Unity" />
         Unity 影片圖鑑
       </h1>
@@ -39,7 +16,7 @@
       </button>
     </header>
 
-    <main class="relative z-10 max-w-6xl mx-auto px-6 py-8">
+    <main class="relative z-10 max-w-screen-2xl mx-auto px-6 py-8">
       <!-- Filters -->
       <div class="filter-block hidden sm:flex sm:flex-col">
         <div class="filter-row">
@@ -57,19 +34,29 @@
             v-for="d in difficultyOptions" :key="d ?? 'all'"
             @click="activeDifficulty = d"
             :class="['chapter-btn', { active: activeDifficulty === d }]"
-          >{{ d === null ? '全部' : d }}</button>
+          >{{ d === null ? '全部' : d }}<span class="chip-count">{{difficultyCounts[d ?? 'all'] }}</span></button>
         </div>
         <div class="filter-row">
           <span class="filter-label">主題</span>
           <button
             :class="['chapter-btn', { active: activeTopic === null }]"
             @click="activeTopic = null"
-          >全部</button>
+          >全部<span class="chip-count">{{difficultyCounts.all }}</span></button>
           <button
             v-for="t in topicOptions" :key="t"
             @click="activeTopic = t"
             :class="['chapter-btn', { active: activeTopic === t }]"
-          >{{ t }}</button>
+          >{{ kwLabel(t) }}<span class="chip-count">{{topicCounts[t] ?? 0 }}</span></button>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">排序</span>
+          <button :class="['chapter-btn', { active: sortBy === null }]" @click="sortBy = null">預設</button>
+          <button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↑</button>
+          <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↓</button>
+        </div>
+        <div v-if="query || activeTopic !== null || activeDifficulty !== null || sortBy !== null" class="filter-row">
+          <span class="filter-label" style="visibility:hidden">x</span>
+          <button class="chapter-btn clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = null">✕ 清除篩選</button>
         </div>
       </div>
 
@@ -80,25 +67,26 @@
         <p class="empty-sub">試試其他關鍵字或清除篩選</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         <div v-for="entry in filtered" :key="entry.id" class="t-card">
           <!-- Thumb -->
           <div class="t-thumb" @click="openModal(entry)">
-            <img v-if="isUrl(entry.thumb)" :src="entry.thumb" :alt="entry.title" class="w-full h-full object-cover" />
+            <img v-if="isThumb(entry.thumb)" :src="getThumbSrc(entry.thumb)" :alt="entry.title" class="w-full h-full object-cover" />
             <span v-else class="text-3xl sm:text-5xl select-none">{{ entry.thumb || '🎮' }}</span>
-            <div class="t-thumb-overlay"><span>詳細資訊</span></div>
+            <div class="t-thumb-overlay"><span>[ OPEN ]</span></div>
           </div>
 
           <!-- Body -->
           <div class="flex flex-col flex-1 px-3 py-2 sm:p-4 gap-1 sm:gap-3 min-w-0">
             <!-- 行1：標題 -->
-            <h2 class="t-card-title font-semibold text-sm sm:text-base line-clamp-1 sm:line-clamp-none">{{ entry.title }}</h2>
-            <!-- 行2：關鍵字（最多一排，超出顯示 +N） -->
+            <h2 class="t-card-title font-semibold text-lg sm:text-xl line-clamp-1 sm:line-clamp-none cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
+            <!-- 行2：關鍵字（topic 優先，最多一排，超出顯示 +N） -->
             <div class="flex flex-nowrap gap-1 sm:gap-1.5 overflow-hidden">
-              <template v-for="(kw, i) in entry.keywords" :key="kw">
-                <button v-if="i < 3" class="t-tag shrink-0" @click="query = kw">{{ kw }}</button>
+              <button class="t-tag shrink-0" @click="query = entry.topic">{{ kwLabel(entry.topic) }}</button>
+              <template v-for="(kw, i) in entry.keywords.slice(0, 4)" :key="kw">
+                <button class="t-tag t-tag-dim shrink-0" @click="query = kw">{{ kwLabel(kw) }}</button>
               </template>
-              <span v-if="entry.keywords.length > 3" class="t-tag shrink-0 cursor-default">+{{ entry.keywords.length - 3 }}</span>
+              <span v-if="entry.keywords.length > 4" class="t-tag t-tag-dim shrink-0 cursor-default">+{{ entry.keywords.length - 4 }}</span>
             </div>
             <!-- 行3：描述 -->
             <p class="t-card-desc text-xs sm:text-sm line-clamp-2 leading-snug">{{ entry.description }}</p>
@@ -106,7 +94,7 @@
             <div class="mt-auto flex gap-2">
               <span v-if="entry.difficulty" :class="['flex items-center justify-center flex-[2] text-xs rounded-lg font-semibold', difficultyColor[entry.difficulty]]">Lv. {{ entry.difficulty }}</span>
               <a :href="`https://www.youtube.com/watch?v=${entry.youtubeId}`" target="_blank" rel="noopener noreferrer"
-                class="flex-[8] flex items-center justify-center gap-1.5 py-1 sm:py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-xs sm:text-sm font-medium transition-colors duration-200">
+                class="flex-[8] flex items-center justify-center gap-1.5 py-1 sm:py-2 rounded-lg bg-red-900/70 hover:bg-red-800/80 text-white/80 text-xs sm:text-sm font-medium transition-colors duration-200">
                 <svg class="w-3 h-3 sm:w-4 sm:h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
@@ -122,7 +110,7 @@
     <Teleport to="body">
       <template v-if="filterOpen">
         <div class="filter-drawer-backdrop" @click="filterOpen = false"></div>
-        <div :data-theme="theme" class="filter-drawer" @click.stop>
+        <div data-theme="k" class="filter-drawer" @click.stop>
           <div class="filter-drawer-header">
             <span class="filter-drawer-title">篩選</span>
             <button class="filter-drawer-close" @click="filterOpen = false">
@@ -131,6 +119,9 @@
               </svg>
             </button>
           </div>
+          <button v-if="query || activeTopic !== null || activeDifficulty !== null || sortBy !== null"
+            class="chapter-btn clear-btn self-start -mt-4"
+            @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = null">✕ 清除篩選</button>
           <div class="filter-drawer-section">
             <span class="filter-label">搜尋</span>
             <div class="search-wrap filter-drawer-search">
@@ -147,7 +138,7 @@
                 v-for="d in difficultyOptions" :key="d ?? 'all'"
                 @click="activeDifficulty = d"
                 :class="['chapter-btn', { active: activeDifficulty === d }]"
-              >{{ d === null ? '全部' : d }}</button>
+              >{{ d === null ? '全部' : d }}<span class="chip-count">{{difficultyCounts[d ?? 'all'] }}</span></button>
             </div>
           </div>
           <div class="filter-drawer-section">
@@ -156,12 +147,20 @@
               <button
                 :class="['chapter-btn', { active: activeTopic === null }]"
                 @click="activeTopic = null"
-              >全部</button>
+              >全部<span class="chip-count">{{difficultyCounts.all }}</span></button>
               <button
                 v-for="t in topicOptions" :key="t"
                 @click="activeTopic = t"
                 :class="['chapter-btn', { active: activeTopic === t }]"
-              >{{ t }}</button>
+              >{{ kwLabel(t) }}<span class="chip-count">{{topicCounts[t] ?? 0 }}</span></button>
+            </div>
+          </div>
+          <div class="filter-drawer-section">
+            <span class="filter-label">排序</span>
+            <div class="filter-drawer-chips">
+              <button :class="['chapter-btn', { active: sortBy === null }]" @click="sortBy = null">預設</button>
+              <button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↑</button>
+              <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↓</button>
             </div>
           </div>
         </div>
@@ -170,12 +169,12 @@
 
     <!-- Modal -->
     <Teleport to="body">
-      <div v-if="modal" :data-theme="theme"
+      <div v-if="modal" data-theme="k"
         class="fixed inset-0 z-50 overflow-y-auto sm:overflow-hidden sm:flex sm:items-center sm:justify-center"
         @click.self="closeModal">
         <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" @click="closeModal"></div>
 
-        <div class="t-modal-panel relative z-10 w-full sm:w-[90vw] sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col sm:max-h-[92vh]">
+        <div class="t-modal-panel relative z-10 w-full sm:w-[90vw] sm:rounded-2xl overflow-hidden shadow-2xl flex flex-col sm:max-h-[96vh]">
           <!-- Video -->
           <div class="aspect-video sm:aspect-auto sm:h-[68vh] bg-black relative shrink-0">
             <iframe :src="`https://www.youtube.com/embed/${modal.youtubeId}`" class="w-full h-full"
@@ -186,24 +185,36 @@
           <div class="p-5 sm:p-4 sm:overflow-y-auto">
             <div class="flex items-start justify-between gap-4">
               <div class="flex items-start gap-2 min-w-0">
-                <h2 class="t-modal-title text-xl font-bold">{{ modal.title }}</h2>
                 <span v-if="modal.difficulty" :class="['shrink-0 text-xs px-2 py-0.5 rounded-full font-semibold mt-1', difficultyColor[modal.difficulty]]">Lv. {{ modal.difficulty }}</span>
+                <h2 class="t-modal-title text-xl font-bold">{{ modal.title }}</h2>
               </div>
-              <button @click="closeModal"
-                class="hidden sm:flex shrink-0 items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-current t-modal-title text-sm font-semibold hover:opacity-70 transition-opacity cursor-pointer">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                </svg>
-                關閉
-              </button>
+              <!-- 桌機：YouTube + 關閉 並排於右上 -->
+              <div class="hidden sm:flex shrink-0 items-center gap-2">
+                <a :href="`https://www.youtube.com/watch?v=${modal.youtubeId}`" target="_blank" rel="noopener noreferrer"
+                  class="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-red-900/70 hover:bg-red-800/80 text-white/80 text-sm font-semibold transition-colors duration-200">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                  前往 YouTube
+                </a>
+                <button @click="closeModal"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border-2 border-current t-modal-title text-sm font-semibold hover:opacity-70 transition-opacity cursor-pointer">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                  關閉
+                </button>
+              </div>
             </div>
-            <p class="t-card-desc mt-3 text-sm leading-relaxed">{{ modal.description }}</p>
-            <div class="mt-4 flex flex-wrap gap-2">
-              <button v-for="kw in modal.keywords" :key="kw" class="t-tag" @click="query = kw; closeModal()">{{ kw }}</button>
+            <div class="mt-2 flex flex-wrap gap-1.5">
+              <button class="t-tag" @click="query = modal.topic; closeModal()">{{ kwLabel(modal.topic) }}</button>
+              <button v-for="kw in modal.keywords" :key="kw" class="t-tag t-tag-dim"
+                @click="query = kw; closeModal()">{{ kwLabel(kw) }}</button>
             </div>
+            <p class="t-card-desc mt-3 text-sm sm:text-base leading-relaxed sm:line-clamp-2">{{ modal.description }}</p>
             <div class="mt-5 flex gap-3">
               <a :href="`https://www.youtube.com/watch?v=${modal.youtubeId}`" target="_blank" rel="noopener noreferrer"
-                class="flex-[7] sm:flex-none sm:w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-semibold transition-colors duration-200">
+                class="sm:hidden flex-[7] flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-900/70 hover:bg-red-800/80 text-white/80 text-sm font-semibold transition-colors duration-200">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
@@ -232,33 +243,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import entries from './data/entries.json'
+import kwMap from './data/keywords.json'
+
+function kwLabel(kw) {
+  const entry = kwMap[kw] ?? kwMap[kw.toLowerCase()]
+  return entry?.label ?? kw
+}
 
 const unityIcon = '/UnityDictionary/unity.svg'
 
-const themes = [
-  { id: 'c', label: 'Cyberpunk',        desc: '霓虹紫 × 賽博龐克' },
-  { id: 'd', label: 'Code Dark',        desc: '綠碼 × 程式編輯器' },
-  { id: 'e', label: 'Retro Pixel',      desc: '像素電玩 × Synthwave' },
-  { id: 'f', label: 'RPG Gold',         desc: '暗金 × 奇幻' },
-  { id: 'g', label: 'Anime Pop',        desc: '亮色 × 日系動漫' },
-  { id: 'h', label: 'JRPG Menu',        desc: '暗紫金 × 日式RPG' },
-  { id: 'i', label: 'Glass HUD',        desc: '毛玻璃 × 青白 Sci-Fi' },
-  { id: 'j', label: 'Vaporwave',        desc: '深紫粉 × 90年代美學' },
-  { id: 'k', label: 'Tactical HUD',     desc: '極深藍 × 綠色軍事介面' },
-]
-
-const theme = ref('c')
-const dropdownOpen = ref(false)
-const pickerRef = ref(null)
 const modal = ref(null)
 const filterOpen = ref(false)
 const query = ref('')
 const activeDifficulty = ref(null)
 const activeTopic = ref(null)
-
-const currentTheme = computed(() => themes.find(t => t.id === theme.value) ?? themes[0])
+const sortBy = ref(null)
 
 const difficultyOptions = [null, 1, 2, 3, 4, 5]
 
@@ -271,27 +272,52 @@ const topicOptions = computed(() => {
   return list
 })
 
+function applyQuery(list) {
+  if (!query.value.trim()) return list
+  const q = query.value.toLowerCase()
+  return list.filter(e =>
+    e.title.toLowerCase().includes(q) ||
+    e.description.toLowerCase().includes(q) ||
+    kwLabel(e.topic).toLowerCase().includes(q) ||
+    e.keywords.some(k => k.toLowerCase().includes(q) || kwLabel(k).toLowerCase().includes(q))
+  )
+}
+
+const difficultyCounts = computed(() => {
+  const base = applyQuery(activeTopic.value ? entries.filter(e => e.topic === activeTopic.value) : entries)
+  const counts = { all: base.length }
+  for (const d of [1,2,3,4,5]) counts[d] = base.filter(e => e.difficulty === d).length
+  return counts
+})
+
+const topicCounts = computed(() => {
+  const base = applyQuery(activeDifficulty.value ? entries.filter(e => e.difficulty === activeDifficulty.value) : entries)
+  const counts = {}
+  for (const e of base) counts[e.topic] = (counts[e.topic] ?? 0) + 1
+  return counts
+})
+
 const filtered = computed(() => {
   let list = entries
-  if (activeDifficulty.value !== null)
-    list = list.filter(e => e.difficulty === activeDifficulty.value)
-  if (activeTopic.value !== null)
-    list = list.filter(e => e.topic === activeTopic.value)
-  if (query.value.trim()) {
-    const q = query.value.toLowerCase()
-    list = list.filter(e =>
-      e.title.toLowerCase().includes(q) ||
-      e.description.toLowerCase().includes(q) ||
-      e.keywords.some(k => k.toLowerCase().includes(q))
-    )
-  }
+  if (activeDifficulty.value !== null) list = list.filter(e => e.difficulty === activeDifficulty.value)
+  if (activeTopic.value !== null) list = list.filter(e => e.topic === activeTopic.value)
+  list = applyQuery(list)
+  if (sortBy.value === 'diff-asc') list = [...list].sort((a, b) => (a.difficulty ?? 99) - (b.difficulty ?? 99))
+  if (sortBy.value === 'diff-desc') list = [...list].sort((a, b) => (b.difficulty ?? 0) - (a.difficulty ?? 0))
   return list
 })
 
-function selectTheme(id) { theme.value = id; dropdownOpen.value = false }
 function openModal(entry) { modal.value = entry }
 function closeModal() { modal.value = null }
 function isUrl(val) { return typeof val === 'string' && (val.startsWith('http') || val.startsWith('/')) }
+function getThumbSrc(val) {
+  if (!val || typeof val !== 'string') return null
+  if (val.startsWith('http') || val.startsWith('/')) return val
+  // 本地檔名 → public/thumbs/
+  if (val.includes('.')) return `${import.meta.env.BASE_URL}thumbs/${val}`
+  return null
+}
+function isThumb(val) { return !!getThumbSrc(val) }
 
 const difficultyColor = {
   1: 'bg-green-500/20 text-green-400 border border-green-500/40',
@@ -301,9 +327,5 @@ const difficultyColor = {
   5: 'bg-red-500/20 text-red-400 border border-red-500/40',
 }
 
-function onClickOutside(e) {
-  if (pickerRef.value && !pickerRef.value.contains(e.target)) dropdownOpen.value = false
-}
-onMounted(() => document.addEventListener('click', onClickOutside))
-onUnmounted(() => document.removeEventListener('click', onClickOutside))
+
 </script>
