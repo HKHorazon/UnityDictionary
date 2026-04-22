@@ -222,9 +222,9 @@
       </div>
     </Teleport>
     <footer class="relative z-10 mt-8 border-t border-white/10 px-6 py-6 text-center text-xs leading-relaxed t-card-desc">
-      <p class="font-medium">弘光科大多遊系 Horazon（張仕明）製作</p>
-      <p class="mt-1 opacity-70">最後更新時間：2026/4/22</p>
-      <p class="mt-2 opacity-60">Unity 可能因版本差異或省略資訊而有錯誤，請見諒，並可寄信至
+      <p class="font-medium">弘光科大多遊系 Horazon(張仕明)製作</p>
+      <p class="mt-2 opacity-70">最後更新時間：2026/4/22</p>
+      <p class="mt-3 opacity-50">Unity 可能因版本差異或省略資訊而有錯誤，請見諒。<br>如有問題，可寄信至
         <a href="mailto:horazon@hk.edu.tw" class="underline hover:opacity-100 transition-opacity">horazon@hk.edu.tw</a>
       </p>
     </footer>
@@ -234,7 +234,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import entries from './data/entries.json'
-import unityIcon from './unity.svg'
+
+const unityIcon = '/UnityDictionary/unity.svg'
 
 const themes = [
   { id: 'c', label: 'Cyberpunk',        desc: '霓虹紫 × 賽博龐克' },

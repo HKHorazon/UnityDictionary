@@ -105,3 +105,17 @@ GitHub Pages 通常需要 1-2 分鐘更新。
 ```
 已取消推送。
 ```
+
+---
+
+## 已知問題與注意事項
+
+### GitHub Actions `npm ci` 失敗（跨平台 lock file 衝突）
+
+**症狀**：CI 失敗，錯誤為 `npm ci can only install packages when your package.json and package-lock.json are in sync`，缺少 `@emnapi/core` 或 `@emnapi/runtime` 特定版本。
+
+**原因**：本地 Windows 使用 Node 20，CI 使用 Node 24（Linux），`@emnapi` 等原生模組在不同平台/版本下會有不同的 optional dependency 版本，造成 lock file 不同步。
+
+**修法**：
+1. 將 `.github/workflows/deploy.yml` 中的 `npm ci` 改為 `npm install`
+2. 同時將 `node-version` 升至 24，`upload-pages-artifact` 升至 v4
