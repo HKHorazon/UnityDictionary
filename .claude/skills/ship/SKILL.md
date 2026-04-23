@@ -95,10 +95,22 @@ git commit -m "建議的訊息"
 git push origin $(git branch --show-current)
 ```
 
-推送成功後輸出：
+推送成功後，從 remote URL 推導 GitHub Pages 網址：
+
+```bash
+REMOTE=$(git remote get-url origin)
+# 從 https://github.com/Owner/Repo.git 提取 owner 與 repo
+OWNER=$(echo "$REMOTE" | sed -E 's|.*github\.com[:/]([^/]+)/.*|\1|')
+REPO=$(echo "$REMOTE" | sed -E 's|.*/([^/]+?)(\.git)?$|\1|')
+echo "https://${OWNER,,}.github.io/${REPO}/"
 ```
-已推送至 https://github.com/HKHorazon/UnityDictionary.git (main)
+
+輸出格式：
+```
+已推送至 https://github.com/Owner/Repo.git (main)
 GitHub Pages 通常需要 1-2 分鐘更新。
+
+網址：https://owner.github.io/Repo/
 ```
 
 若使用者回覆其他內容：

@@ -56,9 +56,8 @@
         </div>
         <div class="filter-row">
           <span class="filter-label">排序</span>
-          <button :class="['chapter-btn', { active: sortBy === null }]" @click="sortBy = null">預設</button>
-          <button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↑</button>
-          <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↓</button>
+<button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↓</button>
+          <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↑</button>
         </div>
         <div v-if="query || activeTopic !== null || activeDifficulty !== null || sortBy !== null" class="filter-row">
           <span class="filter-label" style="visibility:hidden">x</span>
@@ -167,9 +166,8 @@
           <div class="filter-drawer-section">
             <span class="filter-label">排序</span>
             <div class="filter-drawer-chips">
-              <button :class="['chapter-btn', { active: sortBy === null }]" @click="sortBy = null">預設</button>
-              <button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↑</button>
-              <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↓</button>
+        <button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↓</button>
+              <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↑</button>
             </div>
           </div>
         </div>
@@ -269,7 +267,7 @@ watch(filterOpen, v => { document.body.style.overflow = v ? 'hidden' : '' })
 const query = ref('')
 const activeDifficulty = ref(null)
 const activeTopic = ref(null)
-const sortBy = ref(null)
+const sortBy = ref('diff-asc')
 
 const difficultyOptions = [null, 1, 2, 3, 4, 5]
 
