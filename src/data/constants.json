@@ -1,0 +1,32 @@
+{
+  "footer": {
+    "author": "弘光科大多遊系 Horazon(張仕明)製作",
+    "lastUpdated": "2026/4/22",
+    "disclaimerA": "Unity 可能因版本差異或省略資訊而有錯誤，請見諒。",
+    "disclaimerB": "如有問題，請聯絡我"
+  },
+  "philosophy": {
+    "intro": "這套圖鑑，是為了那些「第一次打開 Unity、不知道從哪裡開始」的初學者而生。",
+    "sections": [
+      {
+        "label": "// 降低門檻",
+        "text": "不寫程式、不談架構，只專注在「打開 Unity 後你會遇到什麼」。讓你不再因為害怕按錯按鈕而卻步。"
+      },
+      {
+        "label": "// 視覺化操作",
+        "text": "透過影片直接示範滑鼠游標位置與快捷鍵動作，解決紙本講義或靜態投影片做不到的事。"
+      },
+      {
+        "label": "// 建立自信",
+        "text": "比起背下所有功能，更重要的是「敢於動手嘗試」。每支短片只教一件事，看完就能馬上試。"
+      }
+    ]
+  },
+  "links": [
+    { "label": "製作理念", "type": "philosophy" },
+    { "label": "YouTube",  "type": "youtube",   "href": "https://www.youtube.com/@horazon" },
+    { "label": "LINE",     "type": "line",       "href": "https://line.me/ti/p/ztjEQ_ASvO" },
+    { "label": "Email",    "type": "email",      "href": "mailto:horazon@hk.edu.tw" },
+    { "label": "Discord",  "type": "discord",    "href": "https://discord.com/users/horazon" }
+  ]
+}
