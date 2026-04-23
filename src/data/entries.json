@@ -1,6 +1,6 @@
 [
   {
-    "id": "rigidbody-basics",
+    "id": "PH01",
     "title": "Rigidbody 基礎",
     "difficulty": 1,
     "topic": "physics",
@@ -10,7 +10,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "collider-detection",
+    "id": "PH02",
     "title": "Collider 碰撞偵測",
     "difficulty": 1,
     "topic": "physics",
@@ -20,7 +20,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "physics-material",
+    "id": "PH03",
     "title": "Physics Material 物理材質",
     "difficulty": 2,
     "topic": "physics",
@@ -30,7 +30,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "animator-controller",
+    "id": "AN01",
     "title": "Animator Controller",
     "difficulty": 3,
     "topic": "animation",
@@ -40,7 +40,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "navmesh-navigation",
+    "id": "AI01",
     "title": "NavMesh 導航網格",
     "difficulty": 3,
     "topic": "AI",
@@ -50,7 +50,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "cinemachine-camera",
+    "id": "CA01",
     "title": "Cinemachine 虛擬相機",
     "difficulty": 2,
     "topic": "camera",
@@ -60,7 +60,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "shader-graph-intro",
+    "id": "VS01",
     "title": "Shader Graph 入門",
     "difficulty": 3,
     "topic": "visual",
@@ -70,7 +70,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "post-processing",
+    "id": "VS02",
     "title": "Post Processing 後處理",
     "difficulty": 2,
     "topic": "visual",
@@ -80,7 +80,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "scriptable-object",
+    "id": "AR01",
     "title": "Scriptable Object",
     "difficulty": 4,
     "topic": "architecture",
@@ -90,7 +90,7 @@
     "youtubeId": "_tz8a8vj9TM"
   },
   {
-    "id": "unity-events",
+    "id": "AR02",
     "title": "Unity Events 事件系統",
     "difficulty": 3,
     "topic": "architecture",
