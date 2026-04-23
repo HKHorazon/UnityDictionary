@@ -3,17 +3,23 @@
     <header class="app-header px-5 py-3 flex items-center gap-3 flex-wrap relative">
 
       <!-- Title -->
-      <h1 class="site-title text-2xl font-bold absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+      <h1 class="site-title text-2xl font-bold flex items-center gap-2">
         <img :src="unityIcon" class="w-5 h-5 opacity-90" alt="Unity" />
         Unity 影片圖鑑
       </h1>
 
-      <!-- Mobile filter toggle -->
-      <button class="filter-toggle-btn sm:hidden ml-auto" @click="filterOpen = true">
-        <svg width="22" height="22" viewBox="0 0 15 15" fill="none">
-          <path d="M1 3h13M3 7.5h9M5.5 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-        </svg>
-      </button>
+      <!-- Mobile filter toggle + clear -->
+      <div class="sm:hidden ml-auto flex flex-col items-end gap-1">
+        <button class="filter-toggle-btn" @click="filterOpen = true">
+          <svg width="22" height="22" viewBox="0 0 15 15" fill="none">
+            <path d="M1 3h13M3 7.5h9M5.5 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div v-if="query || activeTopic !== null || activeDifficulty !== null || sortBy !== null"
+          class="w-full border-t border-white/10 pt-1 flex justify-end">
+          <button class="header-clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = null">✕ 清除篩選</button>
+        </div>
+      </div>
     </header>
 
     <main class="relative z-10 max-w-screen-2xl mx-auto px-6 py-8">
@@ -69,37 +75,43 @@
 
       <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         <div v-for="entry in filtered" :key="entry.id" class="t-card">
-          <!-- Thumb -->
-          <div class="t-thumb" @click="openModal(entry)">
-            <img v-if="isThumb(entry.thumb)" :src="getThumbSrc(entry.thumb)" :alt="entry.title" class="w-full h-full object-cover" />
-            <span v-else class="text-3xl sm:text-5xl select-none">{{ entry.thumb || '🎮' }}</span>
-            <div class="t-thumb-overlay"><span>[ OPEN ]</span></div>
-          </div>
+          <!-- 手機：全寬標題 -->
+          <h2 class="sm:hidden t-card-title font-semibold text-lg px-3 pt-3 line-clamp-2 cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
 
-          <!-- Body -->
-          <div class="flex flex-col flex-1 px-3 py-2 sm:p-4 gap-1 sm:gap-3 min-w-0">
-            <!-- 行1：標題 -->
-            <h2 class="t-card-title font-semibold text-lg sm:text-xl line-clamp-1 sm:line-clamp-none cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
-            <!-- 行2：關鍵字（topic 優先，最多一排，超出顯示 +N） -->
-            <div class="flex flex-nowrap gap-1 sm:gap-1.5 overflow-hidden">
-              <button class="t-tag shrink-0" @click="query = entry.topic">{{ kwLabel(entry.topic) }}</button>
-              <template v-for="(kw, i) in entry.keywords.slice(0, 4)" :key="kw">
-                <button class="t-tag t-tag-dim shrink-0" @click="query = kw">{{ kwLabel(kw) }}</button>
-              </template>
-              <span v-if="entry.keywords.length > 4" class="t-tag t-tag-dim shrink-0 cursor-default">+{{ entry.keywords.length - 4 }}</span>
+          <!-- 縮圖 + 內容 row -->
+          <div class="t-card-body-row">
+            <!-- Thumb -->
+            <div class="t-thumb" @click="openModal(entry)">
+              <img v-if="isThumb(entry.thumb)" :src="getThumbSrc(entry.thumb)" :alt="entry.title" class="w-full h-full object-cover" />
+              <span v-else class="text-3xl sm:text-5xl select-none">{{ entry.thumb || '🎮' }}</span>
+              <div class="t-thumb-overlay"><span>[ OPEN ]</span></div>
             </div>
-            <!-- 行3：描述 -->
-            <p class="t-card-desc text-xs sm:text-sm line-clamp-2 leading-snug">{{ entry.description }}</p>
-            <!-- 行4：難度 20% + YouTube 80% -->
-            <div class="mt-auto flex gap-2">
-              <span v-if="entry.difficulty" :class="['flex items-center justify-center flex-[2] text-xs rounded-lg font-semibold', difficultyColor[entry.difficulty]]">Lv. {{ entry.difficulty }}</span>
-              <a :href="`https://www.youtube.com/watch?v=${entry.youtubeId}`" target="_blank" rel="noopener noreferrer"
-                class="flex-[8] flex items-center justify-center gap-1.5 py-1 sm:py-2 rounded-lg bg-red-900/70 hover:bg-red-800/80 text-white/80 text-xs sm:text-sm font-medium transition-colors duration-200">
-                <svg class="w-3 h-3 sm:w-4 sm:h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-                前往 YouTube
-              </a>
+
+            <!-- Body -->
+            <div class="flex flex-col flex-1 px-3 py-2 sm:p-4 gap-1 sm:gap-3 min-w-0">
+              <!-- 桌機標題 -->
+              <h2 class="hidden sm:block t-card-title font-semibold text-xl line-clamp-none cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
+              <!-- 關鍵字 -->
+              <div class="flex flex-nowrap gap-1 sm:gap-1.5 overflow-hidden">
+                <button class="t-tag shrink-0" @click="query = entry.topic">{{ kwLabel(entry.topic) }}</button>
+                <template v-for="(kw, i) in entry.keywords.slice(0, 2)" :key="kw">
+                  <button class="t-tag t-tag-dim shrink-0" @click="query = kw">{{ kwLabel(kw) }}</button>
+                </template>
+                <button v-if="entry.keywords.length > 2" class="t-tag t-tag-dim shrink-0" @click="openModal(entry)">+{{ entry.keywords.length - 2 }}</button>
+              </div>
+              <!-- 描述 -->
+              <p class="t-card-desc text-xs sm:text-sm line-clamp-2 leading-snug">{{ entry.description }}</p>
+              <!-- 難度 + YouTube -->
+              <div class="mt-auto flex gap-2">
+                <span v-if="entry.difficulty" :class="['flex items-center justify-center shrink-0 whitespace-nowrap px-2 text-xs rounded-lg font-semibold', difficultyColor[entry.difficulty]]">Lv. {{ entry.difficulty }}</span>
+                <a :href="`https://www.youtube.com/watch?v=${entry.youtubeId}`" target="_blank" rel="noopener noreferrer"
+                  class="flex-1 flex items-center justify-center gap-1.5 py-1 sm:py-2 rounded-lg bg-red-900/70 hover:bg-red-800/80 text-white/80 text-xs sm:text-sm font-medium transition-colors duration-200">
+                  <svg class="w-3 h-3 sm:w-4 sm:h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                  前往 YouTube
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -119,9 +131,6 @@
               </svg>
             </button>
           </div>
-          <button v-if="query || activeTopic !== null || activeDifficulty !== null || sortBy !== null"
-            class="chapter-btn clear-btn self-start -mt-4"
-            @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = null">✕ 清除篩選</button>
           <div class="filter-drawer-section">
             <span class="filter-label">搜尋</span>
             <div class="search-wrap filter-drawer-search">
@@ -243,7 +252,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import entries from './data/entries.json'
 import kwMap from './data/keywords.json'
 
@@ -256,6 +265,7 @@ const unityIcon = '/UnityDictionary/unity.svg'
 
 const modal = ref(null)
 const filterOpen = ref(false)
+watch(filterOpen, v => { document.body.style.overflow = v ? 'hidden' : '' })
 const query = ref('')
 const activeDifficulty = ref(null)
 const activeTopic = ref(null)

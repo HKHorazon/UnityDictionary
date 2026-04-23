@@ -54,8 +54,8 @@
 .filter-drawer {
   position: fixed; top: 0; right: 0; bottom: 0; width: 80%;
   background: var(--bg-header); border-left: 1px solid var(--border);
-  z-index: 50; display: flex; flex-direction: column; gap: 28px;
-  padding: 24px; overflow-y: auto;
+  z-index: 50; display: flex; flex-direction: column; gap: 18px;
+  padding: 16px; overflow-y: auto;
   animation: drawer-in .22s ease-out;
 }
 @keyframes drawer-in {
@@ -64,24 +64,24 @@
 }
 .filter-drawer-header {
   display: flex; align-items: center; justify-content: space-between;
-  padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
 }
 .filter-drawer-title {
-  font-family: var(--font-heading); font-size: 20px; font-weight: 700;
+  font-family: var(--font-heading); font-size: 15px; font-weight: 700;
   color: var(--text-primary);
 }
 .filter-drawer-close {
-  padding: 10px; border-radius: 10px; cursor: pointer; border: none;
+  padding: 6px; border-radius: 8px; cursor: pointer; border: none;
   background: transparent; color: var(--text-secondary);
   transition: color .15s, background .15s;
 }
 .filter-drawer-close:hover { color: var(--text-primary); background: rgba(255,255,255,.08); }
-.filter-drawer-section { display: flex; flex-direction: column; gap: 12px; }
-.filter-drawer-section .filter-label { font-size: 13px; }
+.filter-drawer-section { display: flex; flex-direction: column; gap: 8px; }
+.filter-drawer-section .filter-label { font-size: 11px; }
 .filter-drawer-search { width: 100%; }
-.filter-drawer-search .search-input { width: 100%; box-sizing: border-box; font-size: 16px; padding: 10px 14px 10px 34px; }
-.filter-drawer-chips { display: flex; flex-wrap: wrap; gap: 10px; }
-.filter-drawer-chips .chapter-btn { font-size: 14px; padding: 6px 18px; }
+.filter-drawer-search .search-input { width: 100%; box-sizing: border-box; font-size: 13px; padding: 7px 12px 7px 28px; }
+.filter-drawer-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-drawer-chips .chapter-btn { font-size: 11px; padding: 4px 12px; }
 
 /* ── Filter Block ───────────────────────────────────────────── */
 .filter-block { flex-direction: column; gap: 10px; margin-bottom: 28px; }
@@ -105,6 +105,14 @@
 .chip-count::before { content: '('; }
 .chip-count::after  { content: ')'; }
 .chip-count { opacity: .45; font-size: .82em; margin-left: 3px; }
+
+.header-clear-btn {
+  font-size: 12px; font-weight: 600; cursor: pointer; border: none;
+  background: transparent; color: rgba(255,100,100,.7);
+  font-family: var(--font-body); padding: 2px 4px;
+  transition: color .15s;
+}
+.header-clear-btn:hover { color: rgba(255,120,120,.95); }
 
 .chapter-btn.clear-btn {
   border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.4);
@@ -256,13 +264,18 @@
 }
 [data-theme="k"] .t-modal-title { color: rgba(255,255,255,.85); letter-spacing: .1em; text-transform: uppercase; }
 
+/* ── Card Body Row ──────────────────────────────────────────── */
+.t-card-body-row {
+  display: flex; flex-direction: column; flex: 1;
+}
+
 /* ── Mobile Card Layout ─────────────────────────────────────── */
 @media (max-width: 639px) {
-  .t-card { flex-direction: row; align-items: stretch; }
+  .t-card-body-row { flex-direction: row; align-items: stretch; }
   .t-thumb {
-    width: 132px; flex-shrink: 0;
-    aspect-ratio: 16/9; align-self: center;
-    margin: 10px; border-radius: 8px;
+    width: 96px; flex-shrink: 0;
+    aspect-ratio: 16/9; align-self: flex-start;
+    margin: 14px 6px 10px 8px; border-radius: 6px;
     border-bottom: none;
   }
 }
