@@ -15,9 +15,9 @@
             <path d="M1 3h13M3 7.5h9M5.5 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </button>
-        <div v-if="query || activeTopic !== null || activeDifficulty !== null || sortBy !== null"
+        <div v-if="query || activeTopic !== null || activeDifficulty !== null"
           class="w-full border-t border-white/10 pt-1 flex justify-end">
-          <button class="header-clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = null">✕ 清除篩選</button>
+          <button class="header-clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = 'diff-asc'">✕ 清除篩選</button>
         </div>
       </div>
     </header>
@@ -59,9 +59,9 @@
 <button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↓</button>
           <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↑</button>
         </div>
-        <div v-if="query || activeTopic !== null || activeDifficulty !== null || sortBy !== null" class="filter-row">
+        <div v-if="query || activeTopic !== null || activeDifficulty !== null" class="filter-row">
           <span class="filter-label" style="visibility:hidden">x</span>
-          <button class="chapter-btn clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = null">✕ 清除篩選</button>
+          <button class="chapter-btn clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = 'diff-asc'">✕ 清除篩選</button>
         </div>
       </div>
 
