@@ -6,7 +6,7 @@
     "disclaimerB": "如有問題，請聯絡我"
   },
   "philosophy": {
-    "intro": "這裡不是教你做遊戲的教程，而是一本查閱用的圖鑑。",
+    "intro": "這裡不是教你做遊戲的教程，而是一本查閱用的圖鑑字典。",
     "sections": [
       {
         "label": "// 這是什麼",
@@ -22,6 +22,7 @@
       }
     ]
   },
+  "sheetsUrl": "https://docs.google.com/spreadsheets/d/1CLWdwl37S8kh4WRPxg83whilpf3IMnTyj1xot3xAeZ8/gviz/tq?tqx=out:json",
   "links": [
     { "label": "製作理念", "type": "philosophy" },
     { "label": "YouTube",  "type": "youtube",   "href": "https://www.youtube.com/@horazon" },

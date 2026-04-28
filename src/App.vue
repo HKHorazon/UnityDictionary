@@ -65,14 +65,18 @@
         </div>
       </div>
 
-      <p v-if="query" class="results-hint">找到 {{ filtered.length }} 筆結果</p>
+      <div v-if="loading" class="empty-state">
+        <p>載入中…</p>
+      </div>
 
-      <div v-if="filtered.length === 0" class="empty-state">
+      <p v-if="!loading && query" class="results-hint">找到 {{ filtered.length }} 筆結果</p>
+
+      <div v-if="!loading && filtered.length === 0" class="empty-state">
         <p>找不到符合的條目</p>
         <p class="empty-sub">試試其他關鍵字或清除篩選</p>
       </div>
 
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div v-else-if="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         <div v-for="entry in filtered" :key="entry.id" class="t-card">
           <!-- 手機：全寬標題 -->
           <h2 class="sm:hidden t-card-title font-semibold text-lg px-3 pt-3 line-clamp-2 cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
@@ -328,8 +332,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
-import entries from './data/entries.json'
+import { ref, computed, watch, onMounted } from 'vue'
 import kwMap from './data/keywords.json'
 import C from './data/constants.json'
 
@@ -338,7 +341,40 @@ function kwLabel(kw) {
   return entry?.label ?? kw
 }
 
+function parseGviz(text) {
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);/)[1])
+  const cols = json.table.cols.map(c => c.label)
+  return json.table.rows.map(row => {
+    const obj = Object.fromEntries(cols.map((col, i) => [col, row.c[i]?.v ?? '']))
+    return {
+      id: String(obj.id ?? ''),
+      title: String(obj.title ?? ''),
+      difficulty: obj.difficulty ? parseInt(obj.difficulty) : null,
+      topic: String(obj.topic ?? ''),
+      keywords: obj.keywords ? String(obj.keywords).split(';').map(k => k.trim()).filter(Boolean) : [],
+      thumb: String(obj.thumb ?? ''),
+      description: String(obj.description ?? ''),
+      youtubeId: String(obj.youtubeId ?? ''),
+    }
+  }).filter(e => e.id)
+}
+
 const unityIcon = '/UnityDictionary/unity.svg'
+
+const entries = ref([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const res = await fetch(C.sheetsUrl)
+    const text = await res.text()
+    entries.value = parseGviz(text)
+  } catch (e) {
+    console.error('Failed to load entries from Google Sheets', e)
+  } finally {
+    loading.value = false
+  }
+})
 
 const modal = ref(null)
 const filterOpen = ref(false)
@@ -354,7 +390,7 @@ const difficultyOptions = [null, 1, 2, 3, 4, 5]
 const topicOptions = computed(() => {
   const seen = new Set()
   const list = []
-  for (const e of entries) {
+  for (const e of entries.value) {
     if (e.topic && !seen.has(e.topic)) { seen.add(e.topic); list.push(e.topic) }
   }
   return list
@@ -372,21 +408,21 @@ function applyQuery(list) {
 }
 
 const difficultyCounts = computed(() => {
-  const base = applyQuery(activeTopic.value ? entries.filter(e => e.topic === activeTopic.value) : entries)
+  const base = applyQuery(activeTopic.value ? entries.value.filter(e => e.topic === activeTopic.value) : entries.value)
   const counts = { all: base.length }
   for (const d of [1,2,3,4,5]) counts[d] = base.filter(e => e.difficulty === d).length
   return counts
 })
 
 const topicCounts = computed(() => {
-  const base = applyQuery(activeDifficulty.value ? entries.filter(e => e.difficulty === activeDifficulty.value) : entries)
+  const base = applyQuery(activeDifficulty.value ? entries.value.filter(e => e.difficulty === activeDifficulty.value) : entries.value)
   const counts = {}
   for (const e of base) counts[e.topic] = (counts[e.topic] ?? 0) + 1
   return counts
 })
 
 const filtered = computed(() => {
-  let list = entries
+  let list = entries.value
   if (activeDifficulty.value !== null) list = list.filter(e => e.difficulty === activeDifficulty.value)
   if (activeTopic.value !== null) list = list.filter(e => e.topic === activeTopic.value)
   list = applyQuery(list)
