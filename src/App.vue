@@ -69,14 +69,19 @@
         <p>載入中…</p>
       </div>
 
-      <p v-if="!loading && query" class="results-hint">找到 {{ filtered.length }} 筆結果</p>
+      <div v-else-if="loadError" class="empty-state">
+        <p>資料載入失敗</p>
+        <p class="empty-sub">請檢查網路連線後重新整理</p>
+      </div>
 
-      <div v-if="!loading && filtered.length === 0" class="empty-state">
+      <p v-if="!loading && !loadError && query" class="results-hint">找到 {{ filtered.length }} 筆結果</p>
+
+      <div v-if="!loading && !loadError && filtered.length === 0" class="empty-state">
         <p>找不到符合的條目</p>
         <p class="empty-sub">試試其他關鍵字或清除篩選</p>
       </div>
 
-      <div v-else-if="!loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div v-else-if="!loading && !loadError" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         <div v-for="entry in filtered" :key="entry.id" class="t-card">
           <!-- 手機：全寬標題 -->
           <h2 class="sm:hidden t-card-title font-semibold text-lg px-3 pt-3 line-clamp-2 cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
@@ -244,6 +249,27 @@
       </div>
     </Teleport>
 
+    <!-- Not Found Modal -->
+    <Teleport to="body">
+      <div v-if="notFound" data-theme="k"
+        class="fixed inset-0 z-50 flex items-center justify-center"
+        @click.self="closeNotFound">
+        <div class="absolute inset-0 bg-black/85 backdrop-blur-sm" @click="closeNotFound"></div>
+        <div class="relative z-10 w-[80vw] max-w-sm t-modal-panel p-8 flex flex-col items-center gap-4 rounded-2xl text-center">
+          <p class="text-4xl select-none">🎮</p>
+          <h2 class="t-modal-title text-lg font-bold">找不到這個條目</h2>
+          <p class="t-card-desc text-sm">連結可能已失效，或條目尚未收錄。</p>
+          <button @click="closeNotFound"
+            class="mt-2 flex items-center gap-2 px-5 py-2 rounded-lg border border-current t-modal-title text-sm font-semibold hover:opacity-70 transition-opacity cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            回到搜尋
+          </button>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Philosophy Modal -->
     <Teleport to="body">
       <div v-if="philosophyOpen" data-theme="k"
@@ -349,7 +375,7 @@ function parseGviz(text) {
     return {
       id: String(obj.id ?? ''),
       title: String(obj.title ?? ''),
-      difficulty: obj.difficulty ? parseInt(obj.difficulty) : null,
+      difficulty: obj.difficulty ? parseInt(obj.difficulty, 10) : null,
       topic: String(obj.topic ?? ''),
       keywords: obj.keywords ? String(obj.keywords).split(';').map(k => k.trim()).filter(Boolean) : [],
       thumb: String(obj.thumb ?? ''),
@@ -359,27 +385,63 @@ function parseGviz(text) {
   }).filter(e => e.id)
 }
 
+const YOUTUBE_ID_RE = /^[A-Za-z0-9_-]{11}$/
+
 const unityIcon = '/UnityDictionary/unity.svg'
 
 const entries = ref([])
 const loading = ref(true)
+const loadError = ref(false)
+const modal = ref(null)
+const notFound = ref(false)
+
+function openModal(entry) {
+  if (!YOUTUBE_ID_RE.test(entry.youtubeId)) {
+    notFound.value = true
+    return
+  }
+  modal.value = entry
+  const url = new URL(window.location.href)
+  url.searchParams.set('id', entry.id)
+  history.replaceState(null, '', url)
+}
+function closeModal() {
+  modal.value = null
+  const url = new URL(window.location.href)
+  url.searchParams.delete('id')
+  history.replaceState(null, '', url)
+}
+function closeNotFound() {
+  notFound.value = false
+  const url = new URL(window.location.href)
+  url.searchParams.delete('id')
+  history.replaceState(null, '', url)
+}
 
 onMounted(async () => {
   try {
     const res = await fetch(C.sheetsUrl)
     const text = await res.text()
     entries.value = parseGviz(text)
+    const idParam = new URLSearchParams(window.location.search).get('id')
+    if (idParam) {
+      const target = entries.value.find(e => e.id === idParam)
+      if (target) openModal(target)
+      else notFound.value = true
+    }
   } catch (e) {
     console.error('Failed to load entries from Google Sheets', e)
+    loadError.value = true
   } finally {
     loading.value = false
   }
 })
 
-const modal = ref(null)
 const filterOpen = ref(false)
 const philosophyOpen = ref(false)
 watch(filterOpen, v => { document.body.style.overflow = v ? 'hidden' : '' })
+watch(modal, v => { document.body.style.overflow = v ? 'hidden' : '' })
+watch(notFound, v => { document.body.style.overflow = v ? 'hidden' : '' })
 const query = ref('')
 const activeDifficulty = ref(null)
 const activeTopic = ref(null)
@@ -431,9 +493,6 @@ const filtered = computed(() => {
   return list
 })
 
-function openModal(entry) { modal.value = entry }
-function closeModal() { modal.value = null }
-function isUrl(val) { return typeof val === 'string' && (val.startsWith('http') || val.startsWith('/')) }
 function getThumbSrc(val) {
   if (!val || typeof val !== 'string') return null
   if (val.startsWith('http') || val.startsWith('/')) return val
