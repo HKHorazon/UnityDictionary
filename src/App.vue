@@ -90,8 +90,8 @@
           <div class="t-card-body-row">
             <!-- Thumb -->
             <div class="t-thumb" @click="openModal(entry)">
-              <img v-if="isThumb(entry.thumb)" :src="getThumbSrc(entry.thumb)" :alt="entry.title" class="w-full h-full object-cover" />
-              <span v-else class="text-3xl sm:text-5xl select-none">{{ entry.thumb || '🎮' }}</span>
+              <img v-if="isThumb(entry.thumb, entry.youtubeId)" :src="getThumbSrc(entry.thumb, entry.youtubeId)" :alt="entry.title" class="w-full h-full object-cover" />
+              <span v-else class="text-3xl sm:text-5xl select-none">🎮</span>
               <div class="t-thumb-overlay"><span>[ OPEN ]</span></div>
             </div>
 
@@ -493,14 +493,15 @@ const filtered = computed(() => {
   return list
 })
 
-function getThumbSrc(val) {
-  if (!val || typeof val !== 'string') return null
-  if (val.startsWith('http') || val.startsWith('/')) return val
-  // 本地檔名 → public/thumbs/
-  if (val.includes('.')) return `${import.meta.env.BASE_URL}thumbs/${val}`
+function getThumbSrc(val, youtubeId) {
+  if (val && typeof val === 'string') {
+    if (val.startsWith('http') || val.startsWith('/')) return val
+    if (val.includes('.')) return `${import.meta.env.BASE_URL}thumbs/${val}`
+  }
+  if (youtubeId) return `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`
   return null
 }
-function isThumb(val) { return !!getThumbSrc(val) }
+function isThumb(val, youtubeId) { return !!getThumbSrc(val, youtubeId) }
 
 const difficultyColor = {
   1: 'bg-green-500/20 text-green-400 border border-green-500/40',
