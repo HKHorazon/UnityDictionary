@@ -1,0 +1,16 @@
+【BA01】下載與安裝 Unity Hub
+
+── 標題 ──
+下載與安裝 Unity Hub｜Unity字典 BA01
+
+── 說明 ──
+Unity Hub 是版本與專案的管理器，不是 Unity 本身。到 unity.com 登入 Unity 帳號後下載 UnityHubSetup 安裝，之後所有版本與專案都從 Hub 進出。裝好 Hub 不等於能開專案，編輯器要再從 Installs 分頁另外安裝。
+
+完整條目：https://hkhorazon.github.io/UnityDictionary/?id=BA01
+Unity字典是一本查閱用的圖鑑，每支短片只講一個 Unity 功能。
+
+── 標籤 ──
+Unity, Unity教學, Unity字典, Unity入門, 遊戲開發, 遊戲引擎, Unity Tutorial, game development, Unity Hub, Unity安裝, Unity下載, LTS, Unity Hub教學, install, download
+
+── 字幕 ──
+1.srt（上傳時選繁體中文）

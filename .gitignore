@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# 影片素材（大檔，不進 git；字幕與腳本要進）
+videos/1.raw/
+videos/2.process/
+videos/3.output/*.mp4
+
+__pycache__/
+.claude/settings.local.json

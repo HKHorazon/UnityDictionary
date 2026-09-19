@@ -1,0 +1,16 @@
+【BA02】建立新專案
+
+── 標題 ──
+建立新專案｜Unity字典 BA02
+
+── 說明 ──
+在 Hub 按 New project，上方選編輯器版本（挑 LTS 最穩），中間選 2D／3D 範本，範本差異只是預設設定，事後可調整。專案路徑避免中文、桌面與雲端同步資料夾。
+
+完整條目：https://hkhorazon.github.io/UnityDictionary/?id=BA02
+Unity字典是一本查閱用的圖鑑，每支短片只講一個 Unity 功能。
+
+── 標籤 ──
+Unity, Unity教學, Unity字典, Unity入門, 遊戲開發, 遊戲引擎, Unity Tutorial, game development, Unity新專案, Unity範本, URP, 2D, 3D, 建立專案, new project, template, lts
+
+── 字幕 ──
+2.srt（上傳時選繁體中文）

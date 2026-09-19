@@ -1,0 +1,21 @@
+id	title	difficulty	topic	keywords	thumb	description	youtubeId
+BA01	下載與安裝 Unity Hub	1	basics	unity hub;install;download	📦	Unity Hub 是版本與專案的管理器，不是 Unity 本身。到 unity.com 登入 Unity 帳號後下載 UnityHubSetup 安裝，之後所有版本與專案都從 Hub 進出。裝好 Hub 不等於能開專案，編輯器要再從 Installs 分頁另外安裝。
+BA02	建立新專案	1	basics	new project;template;lts	🆕	在 Hub 按 New project，上方選編輯器版本（挑 LTS 最穩），中間選 2D／3D 範本，範本差異只是預設設定，事後可調整。專案路徑避免中文、桌面與雲端同步資料夾。
+BA03	開啟既有專案與版本	1	basics	open project;add;version	📂	清單裡沒有的專案用 Add 加入，要選最外層、打開看得到 Assets 的那一層，不是選進 Assets 裡面。版本欄顯示紅色代表該版本未安裝，用其他版本開啟會觸發升級且無法還原，升級前務必備份。
+BA04	認識編輯器介面	1	basics	interface;scene view;inspector	🖥️	Scene 是編輯用的世界，Game 是玩家實際看到的畫面。Hierarchy 列出場景物件，Project 對應硬碟檔案，Inspector 顯示選中對象的設定。版面亂掉可用 Layout > Default 還原。
+BA05	場景視角操作	1	basics	navigation;scene view;focus	🧭	滾輪縮放、中鍵平移、右鍵轉視角，沒有中鍵可改用手掌工具拖曳。物件找不到時在 Hierarchy 雙擊它，鏡頭會立刻對焦過去。這些操作只移動視角，物件本身不會改變。
+BA06	移動旋轉縮放工具	1	basics	transform tools;pivot;local space	↔️	用 Scene 視窗工具列的移動、旋轉、縮放工具改變物件，Inspector 的 Transform 數值會跟著變。Pivot／Center 決定操作軸心位置，Local／Global 決定操作軸向是否跟著物件旋轉。
+BA07	建立物件與 Transform	1	basics	gameobject;transform	🧊	在 Hierarchy 右鍵可建立 Cube、Plane 等基本物件。每個物件都有 Transform，包含 Position 位置、Rotation 角度、Scale 大小，是所有物件的共通設定。
+BA08	場景存檔	1	basics	save;scene file	💾	Ctrl+S 儲存的是場景，標題列星號代表尚未存檔；專案設定與匯入素材則會自動儲存。特別注意 Play 模式中所做的修改，停止播放後一律還原。
+BA09	Project 視窗與資料夾	1	basics	project window;folder;meta file	🗂️	Project 視窗對應專案的 Assets 資料夾，建議依 Scenes、Scripts、Materials、Prefabs 分類。搬移或改名務必在 Unity 內操作，否則 .meta 關聯中斷會造成 Missing。
+BA10	匯入素材	1	basics	import;asset store	📥	將圖片、模型、音效拖進 Project 視窗即完成匯入。點選檔案後 Inspector 顯示的是匯入設定，修改後需按 Apply；圖片要當 2D 精靈使用需將 Texture Type 改為 Sprite。
+BA11	Material 材質與顏色	1	basics	material;color	🎨	預設材質無法修改，需自行 Create > Material 並指定給物件。同一個 Material 被多個物件共用時，修改會同時影響所有使用它的物件。
+BA12	燈光與天空	1	basics	light;directional light;skybox	💡	Directional Light 模擬太陽，只受角度影響、與位置無關；Point Light 才有位置與照射範圍。天空外觀由 Skybox 控制，可在 Lighting 視窗更換。
+BA13	相機與 Game 視窗	1	basics	camera;align with view	🎥	Game 視窗顯示的是 Main Camera 拍到的畫面。選中相機後按 Ctrl+Shift+F 可讓相機對齊目前的 Scene 視角，快速取景。
+BA14	Play 模式	1	basics	play mode	▶️	Play 模式中修改的數值在停止後會全部還原。需要保留時可用 Copy Component 與 Paste Component Values，並建議設定 Playmode tint 顏色避免誤操作。
+BA15	第一支腳本	2	basics	script;monobehaviour;update	📜	建立 C# Script 時檔名必須與 class 名稱一致。Start 在物件初始化時執行一次，Update 每影格執行一次。腳本必須掛載到物件上才會運作。
+BA16	Console 與錯誤訊息	1	basics	console;debug log	🐞	紅色錯誤會導致遊戲無法進入播放，雙擊訊息可直接跳到出錯的程式碼行。使用 Debug.Log 可輸出變數值，並可勾選 Clear on Play 每次播放自動清空。
+BA17	讓變數出現在 Inspector	2	basics	serializefield;public;inspector	🎛️	public 變數會自動顯示在 Inspector，但也開放給其他腳本修改；改用 private 搭配 [SerializeField] 較安全。注意 Inspector 的數值會覆蓋程式碼中的初始值。
+BA18	Prefab 預製物件	2	basics	prefab	🧬	把物件拖回 Project 視窗即可製成 Prefab，修改 Prefab 會同步更新所有複本。若只想修改單一實例，直接在場景中修改即可，被覆寫的欄位會以粗體顯示。
+BA19	父子關係	1	basics	parent;child;hierarchy	👪	在 Hierarchy 拖曳可建立父子關係，子物件的 Transform 變成相對於父物件，會跟隨父物件移動、旋轉與縮放。父物件 Scale 非 1 時子物件會變形。
+BA20	打包成執行檔	2	basics	build;build settings	🏗️	在 Build Profiles 中必須先將場景加入清單，未加入的場景不會被打包，清單最上方為開場場景。輸出後的 exe 與 _Data 資料夾必須一起保留才能執行。

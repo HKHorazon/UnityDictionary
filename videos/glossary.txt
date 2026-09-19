@@ -1,0 +1,87 @@
+# 字幕常用字集（transcribe.py 會讀這個檔）
+#
+# 一行一個詞：轉錄時提示 whisper 優先用這個寫法。
+#   每支影片只帶得下約 30 個詞，出現在該條目腳本／tsv 裡的詞優先帶，
+#   其餘照這裡的順序補到滿為止，所以越常用的詞放越前面。
+#   改了這一段要刪掉 2.process/<n>.words.json 重轉才會生效。
+#
+# 錯 => 對：轉錄完直接替換（寫你在 srt 裡看到的樣子）。
+#   改這一段不用重轉，重跑 transcribe.py 就會套用。
+
+# ── 中文用語（台灣慣用） ──
+專案
+範本
+編輯器
+場景
+物件
+元件
+腳本
+材質
+預製物件
+子物件
+父物件
+
+# ── Hub 與安裝 ──
+Unity Hub
+Installs
+LTS
+Build Support
+New Project
+Add
+Open
+Assets
+Library
+Packages
+
+# ── 介面 ──
+Scene
+Game
+Hierarchy
+Project
+Inspector
+Layout
+Console
+
+# ── 操作 ──
+WASD
+Pivot
+Center
+Local
+Global
+Transform
+Position
+Rotation
+Scale
+Cube
+Plane
+
+# ── 素材與外觀 ──
+.meta
+Missing
+Asset Store
+Package Manager
+Texture Type
+Sprite
+Apply
+Material
+Base Map
+Directional Light
+Point Light
+Skybox
+Lighting
+Main Camera
+
+# ── 播放與程式 ──
+Play
+Playmode tint
+Copy Component
+MonoBehaviour
+Debug.Log
+Clear on Play
+SerializeField
+Prefab
+Build Profiles
+Build Settings
+
+# ── 替換 ──
+運用器 => Unity
