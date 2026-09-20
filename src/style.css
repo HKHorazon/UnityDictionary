@@ -10,15 +10,93 @@
 }
 
 /* ── Page Shell ─────────────────────────────────────────────── */
-/* header 和 main 共用同一條左右邊界，標題才不會孤零零貼在螢幕最左邊 */
+/* 手機 header 專用（桌機 header 已被側邊欄取代） */
 .page-shell {
   width: 100%;
   max-width: 1536px;
   margin-inline: auto;
-  padding-inline: 24px;
+  padding-inline: 16px;
 }
-@media (max-width: 639px) {
-  .page-shell { padding-inline: 16px; }
+
+/* ── App Shell：左側邊欄 + 右內容區 ──────────────────────────── */
+/* 260 側邊欄 + 40 間距 + 1200 內容 = 1500。內容收在 1200 以內，
+   超寬螢幕就讓兩側留白，不要把卡片拉開成一長條。 */
+.app-shell {
+  position: relative; z-index: 10;
+  display: flex; gap: 40px;
+  max-width: 1500px; margin-inline: auto; padding-inline: 24px;
+}
+@media (max-width: 1023px) {
+  .app-shell { display: block; padding-inline: 16px; }
+}
+
+.side-nav {
+  width: 260px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 26px;
+  position: sticky; top: 0; align-self: flex-start;
+  height: 100vh; overflow-y: auto;   /* 滿版高度，右邊那條分隔線才會貫穿整頁 */
+  padding: 26px 24px 28px 0;
+  border-right: 1px solid var(--border);
+}
+@media (max-width: 1023px) { .side-nav { display: none; } }
+
+.side-title {
+  font-size: 19px; line-height: 1.4; margin: 0;
+  padding-bottom: 22px; border-bottom: 1px solid var(--border);
+}
+.side-section { display: flex; flex-direction: column; gap: 10px; }
+.side-section .filter-label { font-size: 12px; min-width: 0; margin: 0; }
+.side-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.side-chips .chapter-btn { font-size: 12px; padding: 4px 12px; }
+.side-clear { align-self: flex-start; font-size: 12px; padding: 4px 16px; }
+
+.side-philosophy {
+  margin-top: auto; padding-top: 22px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  background: none; border-left: none; border-right: none; border-bottom: none;
+  color: rgba(34,197,94,.7); font-family: var(--font-body); font-size: 13px;
+  cursor: pointer; transition: color .15s;
+}
+.side-philosophy:hover { color: var(--accent); }
+
+.main-col { flex: 1; min-width: 0; max-width: 1200px; padding-bottom: 8px; }
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.hero {
+  padding: 60px 0 40px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+.hero-kicker {
+  font-family: 'Share Tech Mono', monospace; font-size: 11px;
+  letter-spacing: .3em; color: rgba(34,197,94,.5); margin: 0 0 16px;
+}
+.hero-title {
+  font-family: 'Share Tech Mono', monospace; font-size: 46px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; line-height: 1.1;
+  color: var(--accent); text-shadow: 0 0 28px rgba(34,197,94,.35);
+  margin: 0 0 18px;
+}
+.hero-lead {
+  font-size: 15px; line-height: 1.9; color: var(--text-secondary);
+  max-width: 44em; margin: 0 0 26px;
+}
+.hero-search { max-width: 520px; }
+.hero-search .search-input {
+  width: 100%; box-sizing: border-box;
+  font-size: 14px; padding: 11px 14px 11px 34px;
+}
+.hero-search .search-icon { left: 13px; }
+.hero-meta {
+  margin: 14px 0 0; font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; letter-spacing: .1em; color: var(--text-muted);
+}
+/* 手機的標題已經在 header 上，封面只留說明和搜尋 */
+@media (max-width: 1023px) {
+  .hero { padding: 22px 0 20px; margin-bottom: 18px; }
+  .hero-kicker, .hero-title { display: none; }
+  .hero-lead { font-size: 14px; margin-bottom: 16px; }
+  .hero-search { max-width: none; }
 }
 
 /* ── Card Grid ──────────────────────────────────────────────── */
@@ -26,7 +104,7 @@
    四欄把標題擠到換行，也不會在寬螢幕留下一大片空白。 */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
   align-items: start;
 }

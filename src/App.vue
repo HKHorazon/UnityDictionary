@@ -1,6 +1,6 @@
 <template>
   <div data-theme="k" class="app-root">
-    <header class="app-header relative">
+    <header class="app-header relative lg:hidden">
       <div class="page-shell py-3 flex items-center gap-3 flex-wrap">
 
       <!-- Title -->
@@ -24,109 +24,185 @@
       </div>
     </header>
 
-    <main class="page-shell relative z-10 py-8">
-      <!-- Filters -->
-      <div class="filter-block hidden sm:flex sm:flex-col">
-        <div class="filter-row">
-          <span class="filter-label">搜尋</span>
-          <div class="search-wrap">
-            <svg class="search-icon" width="14" height="14" viewBox="0 0 15 15" fill="none">
-              <path d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-.72 3.72a4.5 4.5 0 1 1 .71-.71l2.76 2.75a.5.5 0 1 1-.71.71l-2.76-2.75Z" fill="currentColor"/>
-            </svg>
+    <div class="app-shell">
+      <!-- 桌機側邊欄（手機用 header + 抽屜） -->
+      <aside class="side-nav">
+        <h1 class="site-title side-title flex items-center gap-2">
+          <img :src="unityIcon" class="w-5 h-5 opacity-90" alt="Unity" />
+          Unity短片辭典
+        </h1>
+
+        <div class="side-section">
+          <span class="filter-label">難度</span>
+          <div class="side-chips">
+            <button
+              v-for="d in difficultyOptions" :key="d ?? 'all'"
+              @click="activeDifficulty = d"
+              :class="['chapter-btn', { active: activeDifficulty === d }]"
+            >{{ d === null ? '全部' : d }}<span class="chip-count">{{ difficultyCounts[d ?? 'all'] }}</span></button>
+          </div>
+        </div>
+
+        <div class="side-section">
+          <span class="filter-label">主題</span>
+          <div class="side-chips">
+            <button
+              :class="['chapter-btn', { active: activeTopic === null }]"
+              @click="activeTopic = null"
+            >全部<span class="chip-count">{{ difficultyCounts.all }}</span></button>
+            <button
+              v-for="t in topicOptions" :key="t"
+              @click="activeTopic = t"
+              :class="['chapter-btn', { active: activeTopic === t }]"
+            >{{ kwLabel(t) }}<span class="chip-count">{{ topicCounts[t] ?? 0 }}</span></button>
+          </div>
+        </div>
+
+        <div class="side-section">
+          <span class="filter-label">排序</span>
+          <div class="side-chips">
+            <button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↓</button>
+            <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↑</button>
+          </div>
+        </div>
+
+        <button v-if="query || activeTopic !== null || activeDifficulty !== null"
+          class="chapter-btn clear-btn side-clear" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = 'diff-asc'">✕ 清除篩選</button>
+
+        <button class="side-philosophy" @click="philosophyOpen = true">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.196V16a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-1.804A6.001 6.001 0 0 1 6 9a6 6 0 0 1 6-6z"/></svg>
+          製作理念
+        </button>
+      </aside>
+
+      <main class="main-col">
+        <!-- 封面 -->
+        <section class="hero">
+          <p class="hero-kicker">// UNITY REFERENCE</p>
+          <h2 class="hero-title">Unity短片辭典</h2>
+          <p class="hero-lead">{{ C.philosophy.intro }}</p>
+          <div class="search-wrap hero-search">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 15 15" fill="none"><path d="M10 6.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm-.72 3.72a4.5 4.5 0 1 1 .71-.71l2.76 2.75a.5.5 0 1 1-.71.71l-2.76-2.75Z" fill="currentColor"/></svg>
             <input v-model="query" type="text" class="search-input" placeholder="搜尋標題、說明、關鍵字…" />
           </div>
+          <p class="hero-meta">
+            <span v-if="!loading && !loadError">共 {{ entries.length }} 則條目</span>
+            <span v-if="query && !loading"> · 找到 {{ filtered.length }} 筆</span>
+          </p>
+        </section>
+
+        <div v-if="loading" class="empty-state">
+          <p>載入中…</p>
         </div>
-        <div class="filter-row">
-          <span class="filter-label">難度</span>
-          <button
-            v-for="d in difficultyOptions" :key="d ?? 'all'"
-            @click="activeDifficulty = d"
-            :class="['chapter-btn', { active: activeDifficulty === d }]"
-          >{{ d === null ? '全部' : d }}<span class="chip-count">{{difficultyCounts[d ?? 'all'] }}</span></button>
+
+        <div v-else-if="loadError" class="empty-state">
+          <p>資料載入失敗</p>
+          <p class="empty-sub">請檢查網路連線後重新整理</p>
         </div>
-        <div class="filter-row">
-          <span class="filter-label">主題</span>
-          <button
-            :class="['chapter-btn', { active: activeTopic === null }]"
-            @click="activeTopic = null"
-          >全部<span class="chip-count">{{difficultyCounts.all }}</span></button>
-          <button
-            v-for="t in topicOptions" :key="t"
-            @click="activeTopic = t"
-            :class="['chapter-btn', { active: activeTopic === t }]"
-          >{{ kwLabel(t) }}<span class="chip-count">{{topicCounts[t] ?? 0 }}</span></button>
+
+        <p v-if="!loading && !loadError && query" class="results-hint">找到 {{ filtered.length }} 筆結果</p>
+
+        <div v-if="!loading && !loadError && filtered.length === 0" class="empty-state">
+          <p>找不到符合的條目</p>
+          <p class="empty-sub">試試其他關鍵字或清除篩選</p>
         </div>
-        <div class="filter-row">
-          <span class="filter-label">排序</span>
-<button :class="['chapter-btn', { active: sortBy === 'diff-asc' }]" @click="sortBy = 'diff-asc'">難度 ↓</button>
-          <button :class="['chapter-btn', { active: sortBy === 'diff-desc' }]" @click="sortBy = 'diff-desc'">難度 ↑</button>
-        </div>
-        <div v-if="query || activeTopic !== null || activeDifficulty !== null" class="filter-row">
-          <span class="filter-label" style="visibility:hidden">x</span>
-          <button class="chapter-btn clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = 'diff-asc'">✕ 清除篩選</button>
-        </div>
-      </div>
 
-      <div v-if="loading" class="empty-state">
-        <p>載入中…</p>
-      </div>
+        <div v-else-if="!loading && !loadError" class="card-grid">
+          <div v-for="entry in filtered" :key="entry.id" class="t-card">
+            <!-- 手機：全寬標題 -->
+            <h2 class="sm:hidden t-card-title font-semibold text-lg px-3 pt-3 line-clamp-2 cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
 
-      <div v-else-if="loadError" class="empty-state">
-        <p>資料載入失敗</p>
-        <p class="empty-sub">請檢查網路連線後重新整理</p>
-      </div>
-
-      <p v-if="!loading && !loadError && query" class="results-hint">找到 {{ filtered.length }} 筆結果</p>
-
-      <div v-if="!loading && !loadError && filtered.length === 0" class="empty-state">
-        <p>找不到符合的條目</p>
-        <p class="empty-sub">試試其他關鍵字或清除篩選</p>
-      </div>
-
-      <div v-else-if="!loading && !loadError" class="card-grid">
-        <div v-for="entry in filtered" :key="entry.id" class="t-card">
-          <!-- 手機：全寬標題 -->
-          <h2 class="sm:hidden t-card-title font-semibold text-lg px-3 pt-3 line-clamp-2 cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
-
-          <!-- 縮圖 + 內容 row -->
-          <div class="t-card-body-row">
-            <!-- Thumb -->
-            <div class="t-thumb" @click="openModal(entry)">
-              <img v-if="isThumb(entry.thumb, entry.youtubeId)" :src="getThumbSrc(entry.thumb, entry.youtubeId)" :alt="entry.title" class="w-full h-full object-cover" />
-              <span v-else class="text-3xl sm:text-5xl select-none">🎮</span>
-              <div class="t-thumb-overlay"><span>[ OPEN ]</span></div>
-            </div>
-
-            <!-- Body -->
-            <div class="flex flex-col flex-1 px-3 py-2 sm:p-4 gap-1 sm:gap-3 min-w-0">
-              <!-- 桌機標題 -->
-              <h2 class="hidden sm:block t-card-title font-semibold text-xl line-clamp-none cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
-              <!-- 關鍵字 -->
-              <div class="flex flex-nowrap gap-1 sm:gap-1.5 overflow-hidden">
-                <button class="t-tag shrink-0" @click="query = entry.topic">{{ kwLabel(entry.topic) }}</button>
-                <template v-for="(kw, i) in entry.keywords.slice(0, 2)" :key="kw">
-                  <button class="t-tag t-tag-dim shrink-0" @click="query = kw">{{ kwLabel(kw) }}</button>
-                </template>
-                <button v-if="entry.keywords.length > 2" class="t-tag t-tag-dim shrink-0" @click="openModal(entry)">+{{ entry.keywords.length - 2 }}</button>
+            <!-- 縮圖 + 內容 row -->
+            <div class="t-card-body-row">
+              <!-- Thumb -->
+              <div class="t-thumb" @click="openModal(entry)">
+                <img v-if="isThumb(entry.thumb, entry.youtubeId)" :src="getThumbSrc(entry.thumb, entry.youtubeId)" :alt="entry.title" class="w-full h-full object-cover" />
+                <span v-else class="text-3xl sm:text-5xl select-none">🎮</span>
+                <div class="t-thumb-overlay"><span>[ OPEN ]</span></div>
               </div>
-              <!-- 描述 -->
-              <p class="t-card-desc text-xs sm:text-sm line-clamp-2 leading-snug">{{ entry.description }}</p>
-              <!-- 難度 + YouTube -->
-              <div class="mt-auto flex gap-2">
-                <span v-if="entry.difficulty" :class="['flex items-center justify-center shrink-0 whitespace-nowrap px-2 text-xs rounded-lg font-semibold', difficultyColor[entry.difficulty]]">Lv. {{ entry.difficulty }}</span>
-                <a :href="`https://www.youtube.com/watch?v=${entry.youtubeId}`" target="_blank" rel="noopener noreferrer"
-                  class="flex-1 flex items-center justify-center gap-1.5 py-1 sm:py-2 rounded-lg bg-red-900/70 hover:bg-red-800/80 text-white/80 text-xs sm:text-sm font-medium transition-colors duration-200">
-                  <svg class="w-3 h-3 sm:w-4 sm:h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                  </svg>
-                  前往 YouTube
-                </a>
+
+              <!-- Body -->
+              <div class="flex flex-col flex-1 px-3 py-2 sm:p-4 gap-1 sm:gap-3 min-w-0">
+                <!-- 桌機標題 -->
+                <h2 class="hidden sm:block t-card-title font-semibold text-xl line-clamp-none cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>
+                <!-- 關鍵字 -->
+                <div class="flex flex-nowrap gap-1 sm:gap-1.5 overflow-hidden">
+                  <button class="t-tag shrink-0" @click="query = entry.topic">{{ kwLabel(entry.topic) }}</button>
+                  <template v-for="(kw, i) in entry.keywords.slice(0, 2)" :key="kw">
+                    <button class="t-tag t-tag-dim shrink-0" @click="query = kw">{{ kwLabel(kw) }}</button>
+                  </template>
+                  <button v-if="entry.keywords.length > 2" class="t-tag t-tag-dim shrink-0" @click="openModal(entry)">+{{ entry.keywords.length - 2 }}</button>
+                </div>
+                <!-- 描述 -->
+                <p class="t-card-desc text-xs sm:text-sm line-clamp-2 leading-snug">{{ entry.description }}</p>
+                <!-- 難度 + YouTube -->
+                <div class="mt-auto flex gap-2">
+                  <span v-if="entry.difficulty" :class="['flex items-center justify-center shrink-0 whitespace-nowrap px-2 text-xs rounded-lg font-semibold', difficultyColor[entry.difficulty]]">Lv. {{ entry.difficulty }}</span>
+                  <a :href="`https://www.youtube.com/watch?v=${entry.youtubeId}`" target="_blank" rel="noopener noreferrer"
+                    class="flex-1 flex items-center justify-center gap-1.5 py-1 sm:py-2 rounded-lg bg-red-900/70 hover:bg-red-800/80 text-white/80 text-xs sm:text-sm font-medium transition-colors duration-200">
+                    <svg class="w-3 h-3 sm:w-4 sm:h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                    前往 YouTube
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+
+      <footer class="relative z-10 mt-8 border-t border-green-500/30 px-6 py-6 text-center text-xs leading-relaxed">
+        <!-- 桌機：兩行；手機：四行 -->
+        <p class="font-medium text-green-400">
+          {{ C.footer.author }}<span class="hidden sm:inline text-green-500/70"> ( 最後更新：{{ C.footer.lastUpdated }} )</span>
+        </p>
+        <p class="sm:hidden text-green-500/70 mt-1">( 最後更新：{{ C.footer.lastUpdated }} )</p>
+        <p class="mt-2 text-green-500/60">
+          {{ C.footer.disclaimerA }}<span class="hidden sm:inline">{{ C.footer.disclaimerB }}</span>
+        </p>
+        <p class="sm:hidden text-green-500/60">{{ C.footer.disclaimerB }}</p>
+        <div class="mt-3 flex justify-center gap-7 sm:gap-5 footer-links">
+          <template v-for="link in C.links" :key="link.type">
+            <button v-if="link.type === 'philosophy'" @click="philosophyOpen = true"
+              class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors cursor-pointer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.196V16a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-1.804A6.001 6.001 0 0 1 6 9a6 6 0 0 1 6-6z"/>
+              </svg>
+              <span class="hidden sm:inline">{{ link.label }}</span>
+            </button>
+            <a v-else-if="link.type === 'youtube'" :href="link.href" target="_blank" rel="noopener noreferrer"
+              class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              <span class="hidden sm:inline">{{ link.label }}</span>
+            </a>
+            <a v-else-if="link.type === 'line'" :href="link.href" target="_blank" rel="noopener noreferrer"
+              class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.105.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.070 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+              </svg>
+              <span class="hidden sm:inline">{{ link.label }}</span>
+            </a>
+            <a v-else-if="link.type === 'email'" :href="link.href"
+              class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+              <span class="hidden sm:inline">{{ link.label }}</span>
+            </a>
+            <a v-else-if="link.type === 'discord'" :href="link.href" target="_blank" rel="noopener noreferrer"
+              class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.082.114 18.104.135 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+              </svg>
+              <span class="hidden sm:inline">{{ link.label }}</span>
+            </a>
+          </template>
+        </div>
+      </footer>
+      </main>
+    </div>
 
     <!-- Mobile Filter Drawer -->
     <Teleport to="body">
@@ -306,56 +382,6 @@
       </div>
     </Teleport>
 
-    <footer class="relative z-10 mt-8 border-t border-green-500/30 px-6 py-6 text-center text-xs leading-relaxed">
-      <!-- 桌機：兩行；手機：四行 -->
-      <p class="font-medium text-green-400">
-        {{ C.footer.author }}<span class="hidden sm:inline text-green-500/70"> ( 最後更新：{{ C.footer.lastUpdated }} )</span>
-      </p>
-      <p class="sm:hidden text-green-500/70 mt-1">( 最後更新：{{ C.footer.lastUpdated }} )</p>
-      <p class="mt-2 text-green-500/60">
-        {{ C.footer.disclaimerA }}<span class="hidden sm:inline">{{ C.footer.disclaimerB }}</span>
-      </p>
-      <p class="sm:hidden text-green-500/60">{{ C.footer.disclaimerB }}</p>
-      <div class="mt-3 flex justify-center gap-7 sm:gap-5 footer-links">
-        <template v-for="link in C.links" :key="link.type">
-          <button v-if="link.type === 'philosophy'" @click="philosophyOpen = true"
-            class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors cursor-pointer">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3a6 6 0 0 1 6 6c0 2.22-1.2 4.16-3 5.196V16a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-1.804A6.001 6.001 0 0 1 6 9a6 6 0 0 1 6-6z"/>
-            </svg>
-            <span class="hidden sm:inline">{{ link.label }}</span>
-          </button>
-          <a v-else-if="link.type === 'youtube'" :href="link.href" target="_blank" rel="noopener noreferrer"
-            class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-            <span class="hidden sm:inline">{{ link.label }}</span>
-          </a>
-          <a v-else-if="link.type === 'line'" :href="link.href" target="_blank" rel="noopener noreferrer"
-            class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.105.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.070 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
-            </svg>
-            <span class="hidden sm:inline">{{ link.label }}</span>
-          </a>
-          <a v-else-if="link.type === 'email'" :href="link.href"
-            class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            <span class="hidden sm:inline">{{ link.label }}</span>
-          </a>
-          <a v-else-if="link.type === 'discord'" :href="link.href" target="_blank" rel="noopener noreferrer"
-            class="flex items-center gap-1.5 text-green-500/70 hover:text-green-400 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.082.114 18.104.135 18.12a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-            </svg>
-            <span class="hidden sm:inline">{{ link.label }}</span>
-          </a>
-        </template>
-      </div>
-    </footer>
   </div>
 </template>
 
