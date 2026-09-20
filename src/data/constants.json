@@ -22,7 +22,7 @@
       }
     ]
   },
-  "sheetsUrl": "https://docs.google.com/spreadsheets/d/1CLWdwl37S8kh4WRPxg83whilpf3IMnTyj1xot3xAeZ8/gviz/tq?tqx=out:json",
+  "sheetsUrl": "https://docs.google.com/spreadsheets/d/144rBp0wzrRRYMzxuJSW9BtGVUVFJoIouLGhGlfUJfOo/gviz/tq?tqx=out:json&headers=1",
   "links": [
     { "label": "製作理念", "type": "philosophy" },
     { "label": "YouTube",  "type": "youtube",   "href": "https://www.youtube.com/@horazon" },

@@ -1,10 +1,11 @@
-"""把標題／說明／標籤／字幕推到已經上傳的 YouTube 影片上。
+"""把標題／說明／標籤／字幕推到已經上傳的 YouTube 影片上，並同步 Google Sheet。
 
-    python videos/upload.py            # tsv 裡有 youtubeId 的條目全做
+    python videos/upload.py            # tsv 裡有 youtubeId 的條目全做，最後問要不要公開
     python videos/upload.py BA01 BA02  # 只做指定條目
     python videos/upload.py --check    # 只驗證授權，印出連到哪個頻道
     python videos/upload.py --scan     # 從頻道反查影片 ID，自動填進 tsv
-    python videos/upload.py --sheet    # 產出只含已上傳條目的 tsv，貼回 Google Sheet
+    python videos/upload.py --sheet    # 把已上傳的條目寫進 Google Sheet
+    python videos/upload.py --publish  # 只做「改成公開」那一步
 
 影片檔本身請自己在 YouTube Studio 拖上去，不要用 API 傳：未通過 Google 審核的
 API 專案，用 videos.insert 傳的片會被永久鎖成私人，事後在 Studio 也改不回公開，
@@ -14,6 +15,8 @@ API 專案，用 videos.insert 傳的片會被永久鎖成私人，事後在 Stu
   1. videos.update   套上 meta.py 算出來的標題／說明／標籤／分類／語言
   2. captions.insert 上傳 3.output/*.srt（同語言的字幕軌已存在就改用 update）
   3. playlistItems.insert 加進播放清單「Unity短片辭典」（沒有就自動建）
+  4. videos.update   把隱私狀態改成公開（會先列清單問過你才動）
+  5. spreadsheets.values 把已上傳的條目寫進網站在讀的那張 Google Sheet
 
 影片 ID 從 design/sheet-rows-basics.tsv 的 youtubeId 欄讀。不想自己抄 ID 的話
 先跑 --scan，它會照「YouTube 標題 == 成品檔名」把 ID 反查回來填好。
@@ -22,6 +25,7 @@ API 專案，用 videos.insert 傳的片會被永久鎖成私人，事後在 Stu
 授權後 token 會快取在 videos/.youtube-token.json，兩個檔都在 .gitignore 裡。
 設定步驟見 README.md。
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -39,36 +43,71 @@ from meta import OUT, SITE, TSV, build_meta, load
 ROOT = Path(__file__).parent
 SECRET = ROOT / "client_secret.json"
 TOKEN = ROOT / ".youtube-token.json"
-SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+    "https://www.googleapis.com/auth/spreadsheets",
+]
 
 CATEGORY = "27"        # Education
 LANG = "zh-Hant"       # 影片語言與字幕語言
 CAPTION_NAME = "繁體中文"
 PLAYLIST = "Unity短片辭典"
 SHEET_OUT = TSV.parent / "sheet-current.tsv"
+CONSTANTS = ROOT.parent / "src" / "data" / "constants.json"
 VIDEO_ID_RE = re.compile("^[A-Za-z0-9_-]{11}$")
+TAB = chr(9)
 
 
-def service():
-    """拿到已授權的 youtube client；第一次會開瀏覽器要你登入。
+# ── 授權 ────────────────────────────────────────────────────────
+
+def credentials():
+    """拿到授權憑證；第一次、或 scope 變過，會開瀏覽器要你登入。
 
     OAuth 同意畫面停在「測試中」的話，refresh token 只有 7 天壽命，過期後
     refresh 會拋 RefreshError——這裡接住它退回重新授權，不要讓程式直接炸掉。
+    把發布狀態改成「正式版」就沒有這個限制，做法見 README。
     """
-    creds = Credentials.from_authorized_user_file(TOKEN, SCOPES) if TOKEN.exists() else None
+    creds = None
+    if TOKEN.exists():
+        # 這裡千萬不要把 SCOPES 傳進去：傳了會直接蓋掉檔案裡記錄的 scopes，
+        # 底下的檢查就永遠成立，然後又把這份「宣稱的」範圍寫回 token 檔。
+        # token 檔看起來有權限、實際 access token 沒有，Google 會回
+        # ACCESS_TOKEN_SCOPE_INSUFFICIENT，而且怎麼重跑都不會自己修好。
+        creds = Credentials.from_authorized_user_file(TOKEN)
+        if not set(SCOPES).issubset(set(creds.scopes or [])):
+            print("授權範圍變了，要重新授權一次……")
+            creds = None
+
     if creds and creds.expired and creds.refresh_token:
         try:
             creds.refresh(Request())
         except RefreshError:
             print("token 過期了（測試中的專案每 7 天要重新授權一次），重開瀏覽器……")
             creds = None
+
     if not creds or not creds.valid:
         if not SECRET.exists():
             sys.exit(f"找不到 {SECRET}，請先照 README 的「設定 YouTube API」做一次。")
         creds = InstalledAppFlow.from_client_secrets_file(SECRET, SCOPES).run_local_server(port=0)
-    TOKEN.write_text(creds.to_json(), encoding="utf-8")
-    return build("youtube", "v3", credentials=creds)
 
+    TOKEN.write_text(creds.to_json(), encoding="utf-8")
+    return creds
+
+
+def service(creds=None):
+    return build("youtube", "v3", credentials=creds or credentials())
+
+
+def confirm(prompt: str) -> bool:
+    """會改到外面看得到的東西之前問一句。沒有互動終端機就當作不同意。"""
+    try:
+        return input(f"\n{prompt} (y/N) ").strip().lower() in ("y", "yes")
+    except EOFError:
+        print("沒有互動終端機，跳過。")
+        return False
+
+
+# ── YouTube ────────────────────────────────────────────────────
 
 def push_meta(yt, video_id: str, meta: dict) -> None:
     """videos.update 會整段覆蓋 part，所以先讀回現況再改欄位，免得洗掉隱私設定。"""
@@ -156,31 +195,71 @@ def add_to_playlist(yt, playlist_id: str, video_id: str) -> str:
     return f"已加進播放清單「{PLAYLIST}」"
 
 
+def publish(yt, targets: list[tuple[str, str]]) -> None:
+    """把影片改成公開。
+
+    這是整支程式裡唯一會讓影片對外曝光的動作，而且沒有「取消發布」這種乾淨的
+    回頭路（改回私人，先前的曝光也收不回來），所以一定先把清單攤開再問。
+    """
+    if not targets:
+        return
+    found = yt.videos().list(part="status,snippet",
+                             id=",".join(v for _, v in targets)).execute()["items"]
+    current = {v["id"]: v for v in found}
+
+    pending = []
+    for entry_id, video_id in targets:
+        video = current.get(video_id)
+        if not video:
+            print(f"  ! {entry_id} 在頻道上找不到影片 {video_id}")
+            continue
+        state = video["status"]["privacyStatus"]
+        if state == "public":
+            print(f"  - {entry_id} 已經是公開")
+            continue
+        print(f"  · {entry_id} {video['snippet']['title']}（目前 {state}）")
+        pending.append((entry_id, video_id, video))
+
+    if not pending:
+        return
+    if not confirm(f"要把以上 {len(pending)} 支影片改成「公開」嗎？"):
+        print("保持原狀，之後可以單獨跑 python videos/upload.py --publish")
+        return
+
+    for entry_id, video_id, video in pending:
+        status = video["status"] | {"privacyStatus": "public"}
+        yt.videos().update(part="status",
+                           body={"id": video_id, "status": status}).execute()
+        print(f"  {entry_id} → 公開  https://youtu.be/{video_id}")
+
+
+# ── tsv ────────────────────────────────────────────────────────
+
 def write_ids(found: dict[str, str], force: bool) -> list[str]:
     """把影片 ID 寫回 tsv 的 youtubeId 欄，回傳真的有寫進去的條目。
 
-    逐行處理而不是用 csv 模組：這張表是要整份貼回 Google Sheet 的，行尾（CRLF）
-    和「沒有引號」的原樣都要保住，csv.writer 會自作主張加引號。
+    逐行處理而不是用 csv 模組：這張表的行尾（CRLF）和「沒有引號」的原樣都要
+    保住，csv.writer 會自作主張加引號。
     """
     with TSV.open(encoding="utf-8", newline="") as f:
         lines = f.readlines()
-    cols = lines[0].splitlines()[0].split("	")
+    cols = lines[0].splitlines()[0].split(TAB)
     id_col, yt_col = cols.index("id"), cols.index("youtubeId")
 
     written = []
     for i, line in enumerate(lines[1:], start=1):
         body = line.splitlines()[0]
         eol = line[len(body):]
-        fields = body.split("	")
+        fields = body.split(TAB)
         fields += [""] * (len(cols) - len(fields))   # 尾欄是空的時候整欄會被省掉
         entry_id = fields[id_col]
         if entry_id not in found:
             continue
         if fields[yt_col].strip() and fields[yt_col].strip() != found[entry_id] and not force:
-            print(f"  - {entry_id} already has {fields[yt_col]}, left alone (use --force to overwrite)")
+            print(f"  - {entry_id} 已經有 {fields[yt_col]}，不覆蓋（要蓋加 --force）")
             continue
         fields[yt_col] = found[entry_id]
-        lines[i] = "	".join(fields) + eol
+        lines[i] = TAB.join(fields) + eol
         written.append(entry_id)
 
     if written:
@@ -189,7 +268,7 @@ def write_ids(found: dict[str, str], force: bool) -> list[str]:
     return written
 
 
-def scan(yt, rows, clips, force: bool) -> None:
+def scan(yt, clips, force: bool) -> None:
     """從頻道的上傳清單反查影片 ID，不用自己去網址列抄。
 
     對應規則是「YouTube 標題 == 成品檔名的 stem」——把 1.mp4 拖上 Studio，
@@ -211,54 +290,123 @@ def scan(yt, rows, clips, force: bool) -> None:
 
     for entry_id in sorted(by_stem.values()):
         vid = found.get(entry_id)
-        print(f"  {entry_id}  {clips[entry_id]['stem']}.mp4  ->  {vid or '(not found on the channel)'}")
+        print(f"  {entry_id}  {clips[entry_id]['stem']}.mp4  ->  {vid or '(頻道上找不到)'}")
 
     written = write_ids(found, force) if found else []
-    print(f"\n{len(written)} id(s) written to {TSV}")
+    print(f"\n{len(written)} 筆 ID 寫進 {TSV}")
     if written:
-        print("Next: python videos/upload.py")
+        print("下一步：python videos/upload.py")
 
 
-def sheet_rows() -> None:
-    """輸出「只有已經上傳的條目」那幾列到 SHEET_OUT，整份貼回 Google Sheet 用。
+# ── Google Sheet ───────────────────────────────────────────────
 
-    tsv 本身保留全部 20 列（那是入門篇的規劃），沒有影片的條目貼上去只會變成
+def live_rows() -> list[list[str]]:
+    """讀 tsv，挑出「已經有影片」的條目（含表頭），順手存一份到 SHEET_OUT。
+
+    tsv 保留全部 20 列（那是入門篇的規劃），但沒有影片的條目推到網站上只會變成
     點了說「找不到這個條目」的空卡片，所以對外的那份要濾過。
     """
-    TAB = chr(9)
     with TSV.open(encoding="utf-8", newline="") as f:
         lines = f.readlines()
     cols = lines[0].splitlines()[0].split(TAB)
     yt_col = cols.index("youtubeId")
 
-    keep = [lines[0]]
+    keep, rows = [lines[0]], [cols]
     for line in lines[1:]:
         fields = line.splitlines()[0].split(TAB)
         fields += [""] * (len(cols) - len(fields))
         if VIDEO_ID_RE.match(fields[yt_col].strip()):
             keep.append(line)
+            rows.append(fields)
 
     with SHEET_OUT.open("w", encoding="utf-8", newline="") as f:
         f.writelines(keep)
-    print(f"{len(keep) - 1} row(s) -> {SHEET_OUT}")
+    return rows
+
+
+def sheet_id() -> str:
+    """從網站設定挖出試算表 ID，免得兩邊各寫一份會對不上。"""
+    url = json.loads(CONSTANTS.read_text(encoding="utf-8"))["sheetsUrl"]
+    match = re.search("/spreadsheets/d/([A-Za-z0-9_-]+)", url)
+    if not match:
+        sys.exit(f"從 constants.json 的 sheetsUrl 解不出試算表 ID：{url}")
+    return match.group(1)
+
+
+def push_sheet(creds, yes: bool) -> None:
+    """把 live_rows() 覆蓋進網站在讀的那張 Google Sheet 的第一個分頁。
+
+    先 clear 再 update，不然刪掉條目時舊的列會留在表尾。網站是即時抓 sheet 的，
+    寫完重新整理就看得到，不用重 build。
+    """
+    rows = live_rows()
+    print(f"本機已產生 {SHEET_OUT}（{len(rows) - 1} 筆）")
+
+    sheets = build("sheets", "v4", credentials=creds)
+    sid = sheet_id()
+    try:
+        info = sheets.spreadsheets().get(spreadsheetId=sid).execute()
+    except HttpError as e:
+        if "SERVICE_DISABLED" in str(e) or e.resp.status == 403:
+            sys.exit("Google Sheets API 沒啟用，或這個帳號沒有這張表的權限。\n"
+                     "到 Cloud Console 的「API 和服務 > 程式庫」搜 Google Sheets API 按啟用。")
+        raise
+
+    tab = info["sheets"][0]["properties"]["title"]
+    print(f"目標：{info['properties']['title']} / 分頁「{tab}」")
+    for row in rows[1:]:
+        print(f"  · {row[0]}  {row[1]}")
+
+    if not yes and not confirm(f"要清空分頁「{tab}」並寫入這 {len(rows) - 1} 筆嗎？"):
+        print("沒有動 Google Sheet。")
+        return
+
+    sheets.spreadsheets().values().clear(spreadsheetId=sid, range=tab).execute()
+    sheets.spreadsheets().values().update(
+        spreadsheetId=sid, range=f"{tab}!A1",
+        valueInputOption="RAW", body={"values": rows},
+    ).execute()
+    print(f"已寫入 {len(rows) - 1} 筆，重新整理網站就會更新。")
+
+
+# ── 主流程 ──────────────────────────────────────────────────────
+
+def targets_from_tsv(rows, clips, wanted: list[str]) -> list[tuple[str, str]]:
+    out = []
+    for entry_id in sorted(clips):
+        if wanted and entry_id not in wanted:
+            continue
+        video_id = (rows[entry_id].get("youtubeId") or "").strip()
+        if video_id:
+            out.append((entry_id, video_id))
+    return out
 
 
 def main() -> None:
     rows, clips = load()
     args = sys.argv[1:]
-    if args and args[0] == "--check":
+    flags = {a for a in args if a.startswith("--")}
+    wanted = [a.upper() for a in args if not a.startswith("--")]
+
+    missing = [e for e in wanted if e not in clips]
+    if missing:
+        sys.exit(f"trim.json 裡沒有這些條目：{', '.join(missing)}")
+
+    if "--check" in flags:
         check(service())
         return
-    if args and args[0] == "--scan":
-        scan(service(), rows, clips, force="--force" in args)
+    if "--scan" in flags:
+        scan(service(), clips, force="--force" in flags)
         return
-    if args and args[0] == "--sheet":
-        sheet_rows()
+    if "--sheet" in flags:
+        push_sheet(credentials(), yes="--yes" in flags)
         return
-    wanted = [a.upper() for a in args]
+    if "--publish" in flags:
+        publish(service(), targets_from_tsv(rows, clips, wanted))
+        return
 
     todo = []
-    for entry_id, clip in clips.items():
+    for entry_id, clip in sorted(clips.items()):
         if wanted and entry_id not in wanted:
             continue
         video_id = (rows[entry_id].get("youtubeId") or "").strip()
@@ -266,16 +414,13 @@ def main() -> None:
             print(f"- {entry_id} 還沒有 youtubeId，跳過（先在 Studio 傳 {clip['stem']}.mp4）")
             continue
         todo.append((entry_id, clip, video_id))
-    todo.sort()
 
-    missing = [e for e in wanted if e not in clips]
-    if missing:
-        sys.exit(f"trim.json 裡沒有這些條目：{', '.join(missing)}")
     if not todo:
-        sys.exit("沒有可以處理的條目——先把 Studio 拿到的影片 ID 填進 "
+        sys.exit("沒有可以處理的條目——先跑 --scan，或把影片 ID 填進 "
                  f"{TSV} 的 youtubeId 欄。")
 
-    yt = service()
+    creds = credentials()
+    yt = service(creds)
     playlist_id = ensure_playlist(yt)
     failed = []
     for entry_id, clip, video_id in todo:
@@ -291,10 +436,18 @@ def main() -> None:
             print(f"  ! 失敗：{e}")
             failed.append(entry_id)
 
-    done = len(todo) - len(failed)
-    print(f"\n完成 {done}/{len(todo)}。到 Studio 確認後再按發布。")
+    print(f"\n完成 {len(todo) - len(failed)}/{len(todo)}。")
     if failed:
-        sys.exit(f"失敗：{', '.join(failed)}")
+        print(f"失敗：{', '.join(failed)}")
+
+    ok = [(e, v) for e, _, v in todo if e not in failed]
+    if ok:
+        print("\n── 隱私狀態 ──")
+        publish(yt, ok)
+        print("\n── Google Sheet ──")
+        push_sheet(creds, yes=False)
+    if failed:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -55,24 +55,64 @@ videos/
 
 6. **上傳 YouTube** — 影片檔一定要自己在 Studio 拖上去，**不要用 API 傳**：
    未通過 Google 審核的 API 專案，用 `videos.insert` 傳的片會被永久鎖成私人，
-   事後在 Studio 也改不回公開，只能整支重傳。
+   事後在 Studio 也改不回公開，只能整支重傳。要解除這個限制得另外送
+   [YouTube API Services Audit](https://support.google.com/youtube/contact/yt_api_form)，
+   審核要幾週到幾個月，跟 OAuth 的「發布狀態」是兩回事，別搞混。
 
-   拖 `3.output/*.mp4` 進 Studio → 先存成「私人」→ 從網址列抄下影片 ID
-   （`studio.youtube.com/video/`**`這一段`**`/edit`）→ 貼進
-   `design/sheet-rows-basics.tsv` 的 `youtubeId` 欄。
+   拖 `3.output/*.mp4` 進 Studio，先存成「私人」就好，標題不用改
+   （保持預設的 `1`、`2`、`3`，下一步才認得出來）。
 
-7. **套資料** — 標題／說明／標籤／字幕由程式推上去：
+7. **抓影片 ID** — 不用自己去網址列抄：
+
+   ```bash
+   python videos/upload.py --scan
+   ```
+
+   它照「YouTube 標題 == 成品檔名」把 ID 反查回來，填進
+   `design/sheet-rows-basics.tsv` 的 `youtubeId` 欄。標題已經改過的對不上，
+   那種才要自己填。
+
+8. **套資料** — 一支指令做完剩下全部：
 
    ```bash
    python videos/upload.py            # tsv 裡有 youtubeId 的條目全做
    python videos/upload.py BA01 BA02  # 只做指定條目
    ```
 
-   做完回 Studio 檢查一遍再按發布。`upload.py` 不碰隱私狀態，發布永遠是你手動按的。
-   重跑是安全的：字幕軌同語言已存在就換內容，不會長出第二條。
+   依序做：標題／說明／標籤／分類／語言 → 上傳字幕 → 加進播放清單
+   「Unity短片辭典」→ 問你要不要改成公開 → 問你要不要寫進 Google Sheet。
 
-8. **回填** — 上一步已經寫在 tsv 裡了，把整張表貼回 Google Sheet 就更新
-   （網站是從 sheet 動態抓的，不用重 build）。
+   最後兩步都會先把清單列出來再問 y/N，不會自己動。重跑是安全的：字幕軌同語言
+   已存在就換內容、播放清單裡已經有的不會重複加。
+
+   要單獨做某一步：
+
+   ```bash
+   python videos/upload.py --publish  # 只改隱私狀態
+   python videos/upload.py --sheet    # 只同步 Google Sheet
+   python videos/upload.py --check    # 只驗證授權，印出連到哪個頻道
+   ```
+
+## Google Sheet
+
+網站是即時抓 sheet 的，`--sheet` 寫完重新整理就會更新，不用重 build。
+
+要寫哪張表是從 `src/data/constants.json` 的 `sheetsUrl` 解析出來的，只有那裡一份。
+換表的話改那個網址就好，但有兩個地雷：
+
+- 網址結尾的 `&headers=1` **不能拿掉**。少了它 gviz 不會把第一列當表頭，
+  回傳的欄位 label 全是空的，`parseGviz()` 取不到 `id`，整站會變成「找不到符合的條目」。
+- 新表的共用權限要設成「**知道連結的任何人**／檢視者」。網站前端是匿名讀取的，
+  你自己開得起來是因為你登入了，很容易誤判成正常。驗證方式：
+
+  ```bash
+  curl -s "<sheetsUrl>" | head -c 200
+  ```
+
+  看得到 `google.visualization` 開頭就是對的。
+
+`--sheet` 只會寫入「youtubeId 欄是合法 11 碼」的條目。tsv 保留全部 20 列規劃，
+沒有影片的不會推上網站——推上去也只是點了說「找不到這個條目」的空卡片。
 
 ## 設定 YouTube API（只要做一次）
 
