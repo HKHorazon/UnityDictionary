@@ -30,7 +30,7 @@
   "unityevent":       { "label": "Unity 事件", "isTopic": false },
   "delegate":         { "label": "委派",       "isTopic": false },
 
-  "basics":           { "label": "基礎入門",   "isTopic": true  },
+  "basics":           { "label": "基礎",       "isTopic": true  },
   "unity hub":        { "label": "Unity Hub", "isTopic": false },
   "install":          { "label": "安裝",       "isTopic": false },
   "new project":      { "label": "新專案",     "isTopic": false },
