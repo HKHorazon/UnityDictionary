@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Unity字典 (Unity Dictionary)** — A static GitHub Pages website that serves as a reference dictionary for Unity features. Each entry contains a YouTube short video + a brief description teaching one small Unity concept. Users can browse by category and search entries.
+**Unity短片辭典 (Unity Dictionary)** — A static GitHub Pages website that serves as a reference dictionary for Unity features. Each entry contains a short YouTube video (~90s) + a brief description teaching one small Unity concept. These are **regular 16:9 landscape videos, not YouTube Shorts** — the site embeds them in a 16:9 player. Users can browse by category and search entries.
 
 ## Tech Stack
 

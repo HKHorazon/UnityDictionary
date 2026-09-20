@@ -9,6 +9,7 @@ videos/
   build.py     去頭去尾 + 音量正規化
   transcribe.py  產字幕草稿
   meta.py      產標題／說明／標籤
+  upload.py    上傳後套 meta + 傳字幕（影片檔要自己拖上 Studio）
 ```
 
 ## 步驟
@@ -52,11 +53,54 @@ videos/
    輸出 `3.output/4.txt`，直接複製貼上 YouTube。文案的來源是
    `design/sheet-rows-basics.tsv`，要改文字改那裡，不要改 `meta.py`。
 
-6. **上傳 YouTube** — 影片用 `3.output/*.mp4`，字幕上傳校對過的 `*.srt`，
-   標題說明標籤照 `*.txt`。
+6. **上傳 YouTube** — 影片檔一定要自己在 Studio 拖上去，**不要用 API 傳**：
+   未通過 Google 審核的 API 專案，用 `videos.insert` 傳的片會被永久鎖成私人，
+   事後在 Studio 也改不回公開，只能整支重傳。
 
-7. **回填** — 把影片 ID 填進 `design/sheet-rows-basics.tsv` 的 `youtubeId` 欄，
-   整張表貼回 Google Sheet（網站是從 sheet 動態抓的，貼完就更新，不用重 build）。
+   拖 `3.output/*.mp4` 進 Studio → 先存成「私人」→ 從網址列抄下影片 ID
+   （`studio.youtube.com/video/`**`這一段`**`/edit`）→ 貼進
+   `design/sheet-rows-basics.tsv` 的 `youtubeId` 欄。
+
+7. **套資料** — 標題／說明／標籤／字幕由程式推上去：
+
+   ```bash
+   python videos/upload.py            # tsv 裡有 youtubeId 的條目全做
+   python videos/upload.py BA01 BA02  # 只做指定條目
+   ```
+
+   做完回 Studio 檢查一遍再按發布。`upload.py` 不碰隱私狀態，發布永遠是你手動按的。
+   重跑是安全的：字幕軌同語言已存在就換內容，不會長出第二條。
+
+8. **回填** — 上一步已經寫在 tsv 裡了，把整張表貼回 Google Sheet 就更新
+   （網站是從 sheet 動態抓的，不用重 build）。
+
+## 設定 YouTube API（只要做一次）
+
+`upload.py` 第一次跑之前要生一組 OAuth 憑證：
+
+1. 到 [Google Cloud Console](https://console.cloud.google.com/) 建一個專案。
+2. 「API 和服務 > 程式庫」搜 **YouTube Data API v3**，按啟用。
+3. 「API 和服務 > OAuth 同意畫面」選 **外部**，填應用程式名稱和你的信箱就好。
+   然後到「目標對象」按 **發布應用程式**，把狀態從「測試中」改成「正式版」。
+
+   這一步不是送審，app 還是未驗證狀態，授權畫面一樣會跳警告。差別在「測試中」
+   發出來的 refresh token 只有 7 天壽命，每週都要重新授權一次；「正式版」沒有
+   這個限制（未驗證的 app 上限 100 個使用者，自己用綽綽有餘）。
+
+   要留在「測試中」也行，那就得在「目標對象」把自己的 Google 帳號加進測試使用者
+   ——沒加會在授權時被 403 擋掉。
+4. 「憑證 > 建立憑證 > OAuth 用戶端 ID」，類型選 **桌面應用程式**，下載 JSON。
+5. 把下載的檔案改名成 `client_secret.json` 放進 `videos/`。
+
+第一次執行會開瀏覽器要你登入授權，畫面會跳「Google 尚未驗證這個應用程式」，
+按「進階 > 前往（不安全）」——那是你自己的專案，不是別人的。授權後 token 快取在
+`videos/.youtube-token.json`，之後都不用再登入。兩個檔都在 `.gitignore` 裡，
+**不要 commit**。
+
+改過發布狀態的話要刪掉 `videos/.youtube-token.json` 重新授權一次，舊 token 不會
+自動延長。想確認有沒有連對頻道就跑 `python videos/upload.py --check`。
+
+配額：每天 10000 單位，`upload.py` 一支片大約花 450 單位，夠跑 20 支。
 
 ## 找 OBS 切點
 

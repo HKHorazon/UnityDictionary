@@ -30,3 +30,7 @@ videos/3.output/*.mp4
 
 __pycache__/
 .claude/settings.local.json
+
+# YouTube API 憑證（絕對不要進 git）
+videos/client_secret.json
+videos/.youtube-token.json

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>隱私權政策 — Unity短片辭典</title>
+<link rel="icon" type="image/svg+xml" href="/UnityDictionary/unity.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #020617;
+    --bg-card: #050d1f;
+    --border: rgba(34,197,94,.2);
+    --text: #dcfce7;
+    --text-dim: rgba(220,252,231,.6);
+    --accent: #22C55E;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: 'Fira Code', ui-monospace, monospace;
+    line-height: 1.8; font-size: 15px;
+  }
+  .shell { max-width: 860px; margin-inline: auto; padding: 48px 24px 80px; }
+  h1 {
+    font-family: 'Share Tech Mono', monospace; color: var(--accent);
+    text-transform: uppercase; letter-spacing: .12em; font-size: 26px;
+    margin: 0 0 6px;
+  }
+  .sub { color: var(--text-dim); font-size: 13px; margin: 0 0 40px; }
+  h2 {
+    font-family: 'Share Tech Mono', monospace; font-size: 17px;
+    letter-spacing: .06em; color: rgba(255,255,255,.88);
+    margin: 36px 0 10px; padding-top: 18px; border-top: 1px solid var(--border);
+  }
+  h2::before { content: '> '; color: rgba(34,197,94,.6); }
+  p, li { color: var(--text-dim); }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  code {
+    background: rgba(34,197,94,.08); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 3px; color: #86efac; font-size: .9em;
+  }
+  a { color: var(--accent); }
+  .en { margin-top: 56px; padding-top: 24px; border-top: 1px dashed var(--border); }
+  .en h2 { border-top: none; padding-top: 0; }
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    color: rgba(220,252,231,.35); font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <h1>隱私權政策</h1>
+  <p class="sub">應用程式：Horazon_YT ｜ 最後更新：2026 年 9 月 20 日</p>
+
+  <h2>這是什麼</h2>
+  <p>
+    Horazon_YT 是一支個人自用的命令列工具，用來維護
+    <a href="https://hkhorazon.github.io/UnityDictionary/">Unity短片辭典</a>
+    這個教學影片專案在 YouTube 上的內容。它只在作者本人的電腦上執行，
+    只存取作者本人的 YouTube 頻道，沒有對外提供服務，也沒有其他使用者。
+  </p>
+
+  <h2>存取哪些資料</h2>
+  <p>本工具透過 YouTube Data API v3 要求以下授權範圍：</p>
+  <ul>
+    <li><code>https://www.googleapis.com/auth/youtube.force-ssl</code></li>
+  </ul>
+  <p>用途僅限於對作者自己頻道上的影片執行下列操作：</p>
+  <ul>
+    <li>更新影片的標題、說明、標籤、分類與語言設定</li>
+    <li>上傳與更新字幕檔</li>
+    <li>建立播放清單，並把影片加入播放清單</li>
+    <li>讀取頻道名稱與上傳清單，用來核對影片 ID</li>
+  </ul>
+
+  <h2>資料怎麼被儲存</h2>
+  <ul>
+    <li>OAuth 存取權杖只寫在本機檔案 <code>videos/.youtube-token.json</code>，不會上傳到任何伺服器。</li>
+    <li>本工具沒有後端服務、沒有資料庫、沒有分析追蹤，不會把任何資料傳送給第三方。</li>
+    <li>除了 Google 自己的 API 端點之外，本工具不會與任何外部服務通訊。</li>
+    <li>作者可隨時到 <a href="https://myaccount.google.com/permissions">Google 帳戶權限頁</a> 撤銷授權；撤銷後刪除上述權杖檔案即可清除本機殘留。</li>
+  </ul>
+
+  <h2>不做哪些事</h2>
+  <ul>
+    <li>不收集、不儲存、不販售任何個人資料。</li>
+    <li>不存取他人的 Google 帳戶或 YouTube 頻道。</li>
+    <li>不使用 Google 使用者資料訓練任何模型。</li>
+  </ul>
+
+  <h2>聯絡方式</h2>
+  <p>有任何疑問請寄信至 <a href="mailto:horazons@gmail.com">horazons@gmail.com</a>。</p>
+
+  <div class="en">
+    <h2>English summary</h2>
+    <p>
+      Horazon_YT is a personal command-line tool used by a single individual (the author)
+      to maintain their own YouTube channel for the
+      <a href="https://hkhorazon.github.io/UnityDictionary/">Unity短片辭典</a>
+      tutorial project. It runs locally on the author's own machine and has no other users.
+    </p>
+    <p>
+      It requests the <code>youtube.force-ssl</code> scope solely to update video metadata
+      (title, description, tags, category, language), upload caption tracks, create
+      playlists and add the author's own videos to them, and read the channel's upload
+      list to resolve video IDs.
+    </p>
+    <p>
+      The OAuth token is stored only in a local file on the author's computer. There is no
+      server, no database and no analytics. No data is transmitted to any third party, and
+      no Google user data is used to develop, improve or train generalized AI or ML models.
+      Access can be revoked at any time via
+      <a href="https://myaccount.google.com/permissions">Google Account permissions</a>.
+    </p>
+    <p>Contact: <a href="mailto:horazons@gmail.com">horazons@gmail.com</a></p>
+  </div>
+
+  <footer>
+    Unity短片辭典 ·
+    <a href="https://hkhorazon.github.io/UnityDictionary/">回到網站</a>
+  </footer>
+
+</div>
+</body>
+</html>

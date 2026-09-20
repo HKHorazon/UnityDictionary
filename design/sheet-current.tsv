@@ -1,0 +1,4 @@
+id	title	difficulty	topic	keywords	thumb	description	youtubeId
+BA01	下載與安裝 Unity Hub	1	basics	unity hub;install;download	📦	Unity Hub 是版本與專案的管理器，不是 Unity 本身。到 unity.com 登入 Unity 帳號後下載 UnityHubSetup 安裝，之後所有版本與專案都從 Hub 進出。裝好 Hub 不等於能開專案，編輯器要再從 Installs 分頁另外安裝。	hSjN5FSXUPM
+BA02	建立新專案	1	basics	new project;template;lts	🆕	在 Hub 按 New project，上方選編輯器版本（挑 LTS 最穩），中間選 2D／3D 範本，範本差異只是預設設定，事後可調整。專案路徑避免中文、桌面與雲端同步資料夾。	34jjys1D8CU
+BA03	開啟既有專案與版本	1	basics	open project;add;version	📂	清單裡沒有的專案用 Add 加入，要選最外層、打開看得到 Assets 的那一層，不是選進 Assets 裡面。版本欄顯示紅色代表該版本未安裝，用其他版本開啟會觸發升級且無法還原，升級前務必備份。	aL2rUYl7kME

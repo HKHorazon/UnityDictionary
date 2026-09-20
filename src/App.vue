@@ -1,11 +1,12 @@
 <template>
   <div data-theme="k" class="app-root">
-    <header class="app-header px-5 py-3 flex items-center gap-3 flex-wrap relative">
+    <header class="app-header relative">
+      <div class="page-shell py-3 flex items-center gap-3 flex-wrap">
 
       <!-- Title -->
       <h1 class="site-title text-2xl font-bold flex items-center gap-2">
         <img :src="unityIcon" class="w-5 h-5 opacity-90" alt="Unity" />
-        Unity 影片圖鑑
+        Unity短片辭典
       </h1>
 
       <!-- Mobile filter toggle + clear -->
@@ -20,9 +21,10 @@
           <button class="header-clear-btn" @click="query = ''; activeTopic = null; activeDifficulty = null; sortBy = 'diff-asc'">✕ 清除篩選</button>
         </div>
       </div>
+      </div>
     </header>
 
-    <main class="relative z-10 max-w-screen-2xl mx-auto px-6 py-8">
+    <main class="page-shell relative z-10 py-8">
       <!-- Filters -->
       <div class="filter-block hidden sm:flex sm:flex-col">
         <div class="filter-row">
@@ -81,7 +83,7 @@
         <p class="empty-sub">試試其他關鍵字或清除篩選</p>
       </div>
 
-      <div v-else-if="!loading && !loadError" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <div v-else-if="!loading && !loadError" class="card-grid">
         <div v-for="entry in filtered" :key="entry.id" class="t-card">
           <!-- 手機：全寬標題 -->
           <h2 class="sm:hidden t-card-title font-semibold text-lg px-3 pt-3 line-clamp-2 cursor-pointer hover:opacity-80 transition-opacity" @click="openModal(entry)">{{ entry.title }}</h2>

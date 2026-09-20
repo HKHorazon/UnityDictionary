@@ -9,6 +9,31 @@
   position: relative;
 }
 
+/* ── Page Shell ─────────────────────────────────────────────── */
+/* header 和 main 共用同一條左右邊界，標題才不會孤零零貼在螢幕最左邊 */
+.page-shell {
+  width: 100%;
+  max-width: 1536px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+@media (max-width: 639px) {
+  .page-shell { padding-inline: 16px; }
+}
+
+/* ── Card Grid ──────────────────────────────────────────────── */
+/* 用 auto-fill 而不是 grid-cols-N：欄數跟著可用寬度長，不會在 1280 硬塞
+   四欄把標題擠到換行，也不會在寬螢幕留下一大片空白。 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+@media (max-width: 639px) {
+  .card-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
 /* ── Header ─────────────────────────────────────────────────── */
 .app-header {
   background: var(--bg-header);
@@ -254,7 +279,7 @@
 [data-theme="k"] .t-card:hover {
   box-shadow: 0 0 20px rgba(34,197,94,.2), inset 0 0 12px rgba(34,197,94,.04);
 }
-[data-theme="k"] .t-card-title { color: rgba(255,255,255,.85); letter-spacing: .06em; text-transform: uppercase; font-size: 20px; }
+[data-theme="k"] .t-card-title { color: rgba(255,255,255,.85); letter-spacing: .04em; text-transform: uppercase; font-size: 17px; }
 [data-theme="k"] .t-card-title::before { content: '> '; color: rgba(34,197,94,.6); }
 [data-theme="k"] .t-tag { border-radius: 2px; letter-spacing: .06em; font-family: 'Share Tech Mono', monospace; }
 [data-theme="k"] .t-modal-panel {
