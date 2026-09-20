@@ -1,7 +1,7 @@
 id	title	difficulty	topic	keywords	thumb	description	youtubeId
-BA01	下載與安裝 Unity Hub	1	basics	unity hub;install;download	📦	Unity Hub 是版本與專案的管理器，不是 Unity 本身。到 unity.com 登入 Unity 帳號後下載 UnityHubSetup 安裝，之後所有版本與專案都從 Hub 進出。裝好 Hub 不等於能開專案，編輯器要再從 Installs 分頁另外安裝。	hSjN5FSXUPM
-BA02	建立新專案	1	basics	new project;template;lts	🆕	在 Hub 按 New project，上方選編輯器版本（挑 LTS 最穩），中間選 2D／3D 範本，範本差異只是預設設定，事後可調整。專案路徑避免中文、桌面與雲端同步資料夾。	34jjys1D8CU
-BA03	開啟既有專案與版本	1	basics	open project;add;version	📂	清單裡沒有的專案用 Add 加入，要選最外層、打開看得到 Assets 的那一層，不是選進 Assets 裡面。版本欄顯示紅色代表該版本未安裝，用其他版本開啟會觸發升級且無法還原，升級前務必備份。	aL2rUYl7kME
+BA01	下載與安裝 Unity Hub	1	basics	unity hub;install;download	unity-hub.svg	Unity Hub 是版本與專案的管理器，不是 Unity 本身。到 unity.com 登入 Unity 帳號後下載 UnityHubSetup 安裝，之後所有版本與專案都從 Hub 進出。裝好 Hub 不等於能開專案，編輯器要再從 Installs 分頁另外安裝。	hSjN5FSXUPM
+BA02	建立新專案	1	basics	new project;template;lts	new-project.svg	在 Hub 按 New project，上方選編輯器版本（挑 LTS 最穩），中間選 2D／3D 範本，範本差異只是預設設定，事後可調整。專案路徑避免中文、桌面與雲端同步資料夾。	34jjys1D8CU
+BA03	開啟既有專案與版本	1	basics	open project;add;version	open-project.svg	清單裡沒有的專案用 Add 加入，要選最外層、打開看得到 Assets 的那一層，不是選進 Assets 裡面。版本欄顯示紅色代表該版本未安裝，用其他版本開啟會觸發升級且無法還原，升級前務必備份。	aL2rUYl7kME
 BA04	認識編輯器介面	1	basics	interface;scene view;inspector	🖥️	Scene 是編輯用的世界，Game 是玩家實際看到的畫面。Hierarchy 列出場景物件，Project 對應硬碟檔案，Inspector 顯示選中對象的設定。版面亂掉可用 Layout > Default 還原。
 BA05	場景視角操作	1	basics	navigation;scene view;focus	🧭	滾輪縮放、中鍵平移、右鍵轉視角，沒有中鍵可改用手掌工具拖曳。物件找不到時在 Hierarchy 雙擊它，鏡頭會立刻對焦過去。這些操作只移動視角，物件本身不會改變。
 BA06	移動旋轉縮放工具	1	basics	transform tools;pivot;local space	↔️	用 Scene 視窗工具列的移動、旋轉、縮放工具改變物件，Inspector 的 Transform 數值會跟著變。Pivot／Center 決定操作軸心位置，Local／Global 決定操作軸向是否跟著物件旋轉。
