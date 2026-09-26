@@ -1,0 +1,1 @@
+- [影片不強調快捷鍵](video-shortcut-emphasis.md) — 操作以按鈕／滑鼠為主，快捷鍵最多帶一句
