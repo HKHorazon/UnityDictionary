@@ -27,6 +27,9 @@ EXTRA = {
     "BA01": ["Unity Hub", "Unity安裝", "Unity下載", "LTS", "Unity Hub教學"],
     "BA02": ["Unity新專案", "Unity範本", "URP", "2D", "3D", "建立專案"],
     "BA03": ["Unity開啟專案", "Unity版本", "Unity升級", "Add project"],
+    "BA04": ["Unity介面", "Unity編輯器", "Hierarchy", "Inspector", "Scene", "Game"],
+    "BA05": ["Unity視角", "Unity場景操作", "Scene view", "Unity鏡頭"],
+    "BA06": ["Unity移動", "Unity旋轉", "Unity縮放", "Transform", "Local Global"],
 }
 
 TAGS_LIMIT = 500   # YouTube 的標籤總長度上限（含逗號分隔）

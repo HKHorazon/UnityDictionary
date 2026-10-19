@@ -47,6 +47,7 @@
   "focus":            { "label": "對焦",       "isTopic": false },
   "transform tools":  { "label": "變換工具",   "isTopic": false },
   "pivot":            { "label": "軸心",       "isTopic": false },
+  "scale":            { "label": "縮放",       "isTopic": false },
   "local space":      { "label": "區域座標",   "isTopic": false },
   "gameobject":       { "label": "遊戲物件",   "isTopic": false },
   "transform":        { "label": "變換",       "isTopic": false },

@@ -38,31 +38,46 @@ Projects 清單 → Add → 檔案選擇器裡指出正確的那一層 → 紅�
 
 ## BA04 認識介面
 
+**錄前準備**
+沿用 BA02 建的新 3D 專案，SampleScene 有 Main Camera、Directional Light、Global Volume 就夠。
+
 **逐字稿**
-Unity 主畫面就五個區塊。Scene 是你編輯的世界，Game 是玩家實際會看到的畫面，這兩個最容易搞混。Hierarchy 列出這個場景裡所有物件，Project 是硬碟裡的檔案，Inspector 顯示你現在選中那個東西的所有設定。所以流程永遠是：在 Hierarchy 或 Project 點一下，然後在 Inspector 改。版面被弄亂了，右上角 Layout 選 Default 就回復。
+Unity 主畫面就五個區塊。Scene 是你編輯的世界，Game 是玩家實際會看到的畫面，也就是相機拍到的，這兩個最容易搞混。Hierarchy 列出這個場景裡所有物件，Project 是硬碟裡的檔案，Inspector 顯示你現在選中那個東西的所有設定。所以流程永遠是：在 Hierarchy 或 Project 點一下，然後在 Inspector 看、在 Inspector 改。版面被弄亂了，右上角 Layout 選 Default 就回復。
 
 **畫面**
-五個區塊依序打亮並標名稱 → 點 Hierarchy 物件、Inspector 跟著變 → Layout > Default 還原。
+五個區塊依序指出名稱 → 點 Game 分頁、再點回 Scene → 點 Hierarchy 的 Main Camera，Inspector 跟著變 → 點 Project 裡一個檔案，Inspector 又變 → 拖亂一個視窗 → Layout > Default 還原。
+
+**不講**：Play 按鈕（BA14）、Account／Cloud、Package Manager。
 
 ---
 
 ## BA05 場景視角操作
 
+**錄前準備**
+場景先放 2～3 個 Cube，散開擺。口頭帶一句「方塊怎麼建，下一集會講」。
+
 **逐字稿**
-Scene 視窗的視角全靠滑鼠。滾輪縮放，按住中鍵平移——沒有中鍵的話，點左上工具列的手掌按鈕，用左鍵拖也一樣。按住右鍵轉視角，按著右鍵還能用 WASD 在場景裡飛。右上角這個座標小方塊可以直接點，一點就切成俯視、正視這些標準角度。最重要的一招：物件不見了、找不到了，就在 Hierarchy 雙擊它，鏡頭馬上飛到它面前。記住，這些都只是在移動你的眼睛，物件本身一動也沒動。
+Scene 視窗的視角全靠滑鼠。滾輪縮放，按住中鍵平移——沒有中鍵的話，點左上工具列的手掌按鈕，用左鍵拖也一樣。按住右鍵轉視角。右上角這個座標小方塊可以直接點，一點就切成俯視、正視這些標準角度。最重要的一招：物件不見了、找不到了，就在 Hierarchy 雙擊它，鏡頭馬上飛到它面前。最後看一下 Inspector，Position 一個數字都沒變——這些都只是在移動你的眼睛，物件本身一動也沒動。
 
 **畫面**
-依序示範滾輪、中鍵、點手掌按鈕拖曳、右鍵轉視角 → 點右上角座標小方塊切換俯視／正視 → 故意把視角拉到很遠 → 在 Hierarchy 雙擊物件飛回去。
+依序示範滾輪、中鍵、點手掌按鈕拖曳、右鍵轉視角 → 點右上角座標小方塊切換俯視／正視 → 故意把視角拉到很遠 → 在 Hierarchy 雙擊物件飛回去 → 選中 Cube，指 Inspector 的 Position 沒變。
+
+**不講**：右鍵 + WASD 飛行（最多順口一句）。
 
 ---
 
 ## BA06 移動、旋轉、縮放工具
 
+**錄前準備**
+沿用 BA05 的場景，其中一個 Cube 先轉 45 度（Rotation Y 打 45）。
+
 **逐字稿**
-上一支是移動你的眼睛，這一支是移動物件本身。Scene 視窗左上的工具列，手掌下面依序是移動、旋轉、縮放。選移動，拖箭頭，你會看到 Inspector 的 Position 數字跟著變——這就是跟移動視角最大的差別。旋轉、縮放也一樣，縮放時拖中間的方塊是等比例放大。上方還有兩個按鈕很多人沒注意：Pivot 和 Center，決定一次選多個物件時，是各自原地轉、還是繞著大家的中間轉；Local 和 Global，決定箭頭跟著物件轉、還是永遠對齊世界座標。角色轉過身之後想讓它往自己的前面走，就要切到 Local。
+上一支是移動你的眼睛，這一支是移動物件本身。Scene 視窗左上的工具列，手掌下面依序是移動、旋轉、縮放。選移動，拖箭頭，你會看到 Inspector 的 Position 數字跟著變——這就是跟移動視角最大的差別。旋轉、縮放也一樣。縮放要注意：拖中間的方塊才是等比例放大，只拖一個軸，東西就會被壓扁。最後一個很多人沒注意的按鈕：Local 和 Global。Global 的箭頭永遠對齊世界，Local 的箭頭跟著物件轉。角色轉過身之後想讓它往自己的前面走，就要切到 Local。
 
 **畫面**
-點移動按鈕 → 拖箭頭、特寫 Inspector 的 Position 數字在跳 → 點旋轉、縮放各拖一下 → 選兩個 Cube，Center 模式旋轉（繞中間公轉）→ 切 Pivot（各自原地轉）→ 把 Cube 轉 45 度，切 Local / Global 看箭頭方向差異。
+點移動按鈕 → 拖箭頭、特寫 Inspector 的 Position 數字在跳 → 點旋轉拖一下 → 點縮放，先拖單軸（變扁）、復原、再拖中間方塊（等比例）→ 選轉 45 度的 Cube，切 Global／Local 看箭頭方向差異。
+
+**不講**：Pivot／Center、Rect Tool、Transform Tool（三合一）。Unity 6 的 Local／Global 在 Scene 視窗上方的 overlay，不在主工具列。
 
 ---
 

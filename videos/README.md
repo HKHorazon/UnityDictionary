@@ -6,7 +6,8 @@ videos/
   2.process/   轉錄的中間檔（*.wav、*.words.json），可以隨時刪
   3.output/    成品：*.mp4 + *.srt + *.txt，上傳 YouTube 就用這一包
   trim.json    每支影片的去頭去尾秒數 + 對應的條目 ID
-  build.py     去頭去尾 + 音量正規化
+  build.py     去頭去尾 + 音量正規化 + 開頭標題投影片
+  card.py      產標題投影片（build.py 會自動叫，單獨跑可以先看圖）
   transcribe.py  產字幕草稿
   meta.py      產標題／說明／標籤
   upload.py    上傳後套 meta + 傳字幕（影片檔要自己拖上 Studio）
@@ -14,7 +15,7 @@ videos/
 
 ## 步驟
 
-1. **錄影** — 錄完丟進 `1.raw/`。
+1. **錄影** — 錄完丟進 `1.raw/`（.mkv 或 .mp4 都可以）。
 
 2. **標切點** — 在 `trim.json` 加一筆，寫下要保留的區間和對應的條目 ID：
 
@@ -35,11 +36,23 @@ videos/
    輸出 `3.output/4.mp4`。錄出來通常只有 -43 LUFS，YouTube 標準是 -14，
    差快 30 dB，一定要跑這步。
 
+   有 `id` 的影片開頭會加 4 秒標題投影片（標題＋說明，文字取自
+   `design/sheet-rows-basics.tsv`），圖存在 `2.process/cards/`。開頭露出 OBS
+   但已經在講話、切不掉的，在 `trim.json` 加 `"cover": 秒數`，投影片會蓋到那一秒，
+   聲音照放；結尾同理用 `"cover_end": 秒數`，投影片從那一秒淡入蓋到最後。
+   想先看投影片：`python videos/card.py BA04`。投影片文字要跟網站不同（例如改成
+   條列），寫在 `card.py` 的 `CUSTOM`。
+
+   投影片會讓時間軸整段往後推 4 秒，所以字幕一定要在這步**之後**轉。
+
 4. **字幕** — 對 `3.output` 的成品轉錄（不是對原始檔，去頭之後時間軸已經位移）：
 
    ```bash
-   python videos/transcribe.py
+   uv run --with faster-whisper --with "av<16" python videos/transcribe.py
    ```
+
+   `av<16` 不能拿掉：PyAV 新版拿掉了 faster-whisper 會用到的參數，
+   會噴 `open() got an unexpected keyword argument 'metadata_errors'`。
 
    輸出 `3.output/4.srt`。**這是草稿，一定要校對**：whisper 會把 Unity 專有
    名詞聽錯，聽不清楚的地方也會自己編一個相近的詞出來。

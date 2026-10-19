@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180">
+  <rect width="320" height="180" fill="#0d1117"/>
+  <defs>
+    <radialGradient id="g1" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#241a33"/>
+      <stop offset="100%" stop-color="#0d1117"/>
+    </radialGradient>
+  </defs>
+  <rect width="320" height="180" fill="url(#g1)"/>
+  <g fill="none" stroke="#86efac" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="60" y="30" width="200" height="120" rx="3"/>
+    <line x1="60" y1="44" x2="260" y2="44"/>
+    <line x1="100" y1="44" x2="100" y2="150"/>
+    <line x1="216" y1="44" x2="216" y2="150"/>
+    <line x1="100" y1="120" x2="216" y2="120"/>
+    <g stroke-width="1.2" opacity="0.4">
+      <line x1="67" y1="54" x2="92" y2="54"/>
+      <line x1="72" y1="63" x2="92" y2="63"/>
+      <line x1="72" y1="72" x2="88" y2="72"/>
+      <line x1="223" y1="54" x2="252" y2="54"/>
+      <line x1="223" y1="63" x2="246" y2="63"/>
+      <line x1="223" y1="72" x2="252" y2="72"/>
+      <line x1="223" y1="81" x2="240" y2="81"/>
+      <rect x="108" y="128" width="12" height="12"/>
+      <rect x="126" y="128" width="12" height="12"/>
+      <rect x="144" y="128" width="12" height="12"/>
+    </g>
+    <path d="M158 66 L172 74 L172 90 L158 98 L144 90 L144 74 Z"/>
+    <path d="M144 74 L158 82 L172 74 M158 82 V98" stroke-width="1.5"/>
+  </g>
+  <circle cx="67" cy="37" r="2" fill="#86efac"/>
+</svg>
