@@ -1,0 +1,16 @@
+【BA05】Scene 場景視窗
+
+── 標題 ──
+Scene 場景視窗｜Unity短片辭典
+
+── 說明 ──
+Scene 視窗用滾輪縮放、右鍵旋轉、左鍵選取，右上角座標方塊一點就切到上方、正面等視角，手掌工具可以拖曳平移。物件找不到就在 Hierarchy 雙擊，鏡頭會直接飛過去。眼睛圖示和 Gizmos 只隱藏編輯畫面，不影響遊戲；上方還能切 2D 模式與 Shaded、Wireframe 等繪製模式。
+
+完整條目：https://hkhorazon.github.io/UnityDictionary/?id=BA05
+Unity短片辭典是一本查閱用的圖鑑，每支短片只講一個 Unity 功能。
+
+── 標籤 ──
+Unity, Unity教學, Unity短片辭典, Unity字典, Unity入門, 遊戲開發, 遊戲引擎, Unity Tutorial, game development, Unity視角, Unity場景操作, Scene view, Unity鏡頭, navigation, focus, gizmos
+
+── 字幕 ──
+5.srt（上傳時選繁體中文）

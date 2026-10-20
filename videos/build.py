@@ -7,6 +7,9 @@
 trim.json 有 id 的才會加投影片：先靜音放 CARD_SECONDS 秒，再接影片。
 有 cover 的話投影片會繼續蓋在影片上直到原始檔的 cover 秒（聲音照放），
 拿來遮開頭露出的 OBS 畫面；cover_end 則是從那一秒起淡入蓋到結尾，遮結尾的 OBS。
+
+聲音先用 DeepFilterNet 去掉鍵盤聲和底噪（整支原始檔做一次，快取在 2.process/*.denoised.wav），
+再做音量正規化。原始檔換過就把快取刪掉重做。
 """
 import csv
 import json
@@ -19,12 +22,32 @@ from meta import TSV
 
 ROOT = Path(__file__).parent
 RAW = ROOT / "1.raw"
+PROC = ROOT / "2.process"
 OUT = ROOT / "3.output"
 TRIM = json.loads((ROOT / "trim.json").read_text(encoding="utf-8"))
 
 TARGET = "I=-14:TP=-1.5:LRA=11"   # YouTube 的播放響度標準
 CARD_SECONDS = 4.0                 # 投影片單獨停留的秒數，字幕時間軸會跟著往後推這麼多
 FADE = 0.4                         # 投影片淡出到影片的秒數
+
+# DeepFilterNet 只有舊版 Python 裝得起來，用 uv 開一個 3.10 的臨時環境跑
+DEEPFILTER = ["uv", "run", "-p", "3.10", "--with", "deepfilternet", "--with", "torch==2.1.2",
+              "--with", "torchaudio==2.1.2", "--with", "soundfile", "deepFilter"]
+
+
+def denoise(src: Path) -> Path:
+    """整支原始檔的聲音去噪，回傳快取的 wav（時間軸跟原始檔一樣）。"""
+    out = PROC / f"{src.stem}.denoised.wav"
+    if out.exists():
+        return out
+    PROC.mkdir(exist_ok=True)
+    wav = PROC / f"{src.stem}.noisy.wav"
+    subprocess.run(["ffmpeg", "-v", "error", "-i", str(src), "-vn", "-ac", "1", "-ar", "48000",
+                    "-y", str(wav)], check=True)
+    subprocess.run([*DEEPFILTER, str(wav), "-o", str(PROC)], check=True, capture_output=True)
+    (PROC / f"{wav.stem}_DeepFilterNet3.wav").replace(out)
+    wav.unlink()
+    return out
 
 
 def measure(src: Path, start: float, end: float | None) -> dict:
@@ -46,7 +69,8 @@ def main() -> None:
     for src in videos:
         cfg = TRIM.get(src.name, {})
         start, end = float(cfg.get("start", 0)), cfg.get("end")
-        m = measure(src, start, end)
+        audio = denoise(src)
+        m = measure(audio, start, end)
         dst = OUT / (src.stem + ".mp4")
         span = f"{start}s → {end or '結尾'}"
         print(f"{src.name}: 保留 {span}，{m['input_i']} LUFS → -14 LUFS", flush=True)
@@ -54,7 +78,8 @@ def main() -> None:
                 f"measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
                 f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:"
                 f"offset={m['target_offset']}:linear=true")
-        clip = ["-ss", str(start), *(["-to", str(end)] if end else []), "-i", str(src)]
+        cut = ["-ss", str(start), *(["-to", str(end)] if end else [])]
+        clip = [*cut, "-i", str(src)]
 
         if cfg.get("id") in rows:
             card = str(render(rows[cfg["id"]]))
@@ -75,6 +100,8 @@ def main() -> None:
                 inputs += ["-loop", "1", "-framerate", "60", "-t", str(dur), "-i", card]
                 tail = (f"[3:v]format=rgba,fade=t=in:d={FADE}:alpha=1,setpts=PTS+{at}/TB[e];"
                         f"[m0][e]overlay=eof_action=pass[m1];")
+            ai = inputs.count("-i")            # 去噪後的聲音接在最後一個輸入
+            inputs += [*cut, "-i", str(audio)]
             graph = (
                 f"[0:v]{same}[v];"
                 f"[2:v]format=rgba,fade=t=out:st={over - FADE}:d={FADE}:alpha=1[o];"
@@ -82,13 +109,14 @@ def main() -> None:
                 f"[m1]{same}[main];"
                 f"[1:v]{same}[pre];"
                 f"anullsrc=r=48000:cl=stereo,atrim=duration={CARD_SECONDS}[sil];"
-                f"[0:a]{norm},aresample=48000,aformat=channel_layouts=stereo[a];"
+                f"[{ai}:a]{norm},aresample=48000,aformat=channel_layouts=stereo[a];"
                 f"[pre][sil][main][a]concat=n=2:v=1:a=1[vout][aout]"
             )
             filters = ["-filter_complex", graph, "-map", "[vout]", "-map", "[aout]"]
             print(f"  + 投影片 {CARD_SECONDS}s，蓋到影片第 {over:.1f}s", flush=True)
         else:
-            inputs, filters = clip, ["-af", norm]
+            inputs = [*clip, *cut, "-i", str(audio)]
+            filters = ["-map", "0:v", "-map", "1:a", "-af", norm]
 
         # ponytail: 切點不在關鍵格上，所以影像一定要重編；crf 18 對螢幕錄影是視覺無損
         subprocess.run(

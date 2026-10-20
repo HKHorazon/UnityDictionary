@@ -29,7 +29,10 @@ EXTRA = {
     "BA03": ["Unity開啟專案", "Unity版本", "Unity升級", "Add project"],
     "BA04": ["Unity介面", "Unity編輯器", "Hierarchy", "Inspector", "Scene", "Game"],
     "BA05": ["Unity視角", "Unity場景操作", "Scene view", "Unity鏡頭"],
-    "BA06": ["Unity移動", "Unity旋轉", "Unity縮放", "Transform", "Local Global"],
+    "BA06": ["Unity移動", "Unity旋轉", "Unity縮放", "Transform", "Unity Transform"],
+    "BA07": ["Unity匯入素材", "Unity素材", "Import New Asset", "Unity圖片", "Unity音效", "FBX"],
+    "BA08": ["Unity Asset Store", "Unity素材", "Package Manager", "Unity套件"],
+    "BA20": ["TextMeshPro", "TMP中文", "Unity中文字型", "Unity中文方框", "Font Asset"],
 }
 
 TAGS_LIMIT = 500   # YouTube 的標籤總長度上限（含逗號分隔）
@@ -69,7 +72,7 @@ def build_meta(entry_id: str, row: dict) -> dict:
         used += cost
 
     return {
-        "title": f"{row['title']}｜Unity短片辭典 {entry_id}",
+        "title": f"{row['title']}｜Unity短片辭典",
         "description": (
             f"{row['description']}\n\n"
             f"完整條目：{SITE}?id={entry_id}\n"

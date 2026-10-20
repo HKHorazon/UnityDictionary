@@ -2,20 +2,24 @@ id	title	difficulty	topic	keywords	thumb	description	youtubeId
 BA01	下載與安裝 Unity Hub	1	basics	unity hub;install;download	unity-hub.svg	Unity Hub 是版本與專案的管理器，不是 Unity 本身。到 unity.com 登入 Unity 帳號後下載 UnityHubSetup 安裝，之後所有版本與專案都從 Hub 進出。裝好 Hub 不等於能開專案，編輯器要再從 Installs 分頁另外安裝。	hSjN5FSXUPM
 BA02	建立新專案	1	basics	new project;template;lts	new-project.svg	在 Hub 按 New project，上方選編輯器版本（挑 LTS 最穩），中間選 2D／3D 範本，範本差異只是預設設定，事後可調整。專案路徑避免中文、桌面與雲端同步資料夾。	34jjys1D8CU
 BA03	開啟既有專案與版本	1	basics	open project;add;version	open-project.svg	清單裡沒有的專案用 Add 加入，要選最外層、打開看得到 Assets 的那一層，不是選進 Assets 裡面。版本欄顯示紅色代表該版本未安裝，用其他版本開啟會觸發升級且無法還原，升級前務必備份。	aL2rUYl7kME
-BA04	認識編輯器介面	1	basics	interface;scene view;inspector	interface.svg	Scene 是編輯用的世界，Game 是玩家實際看到的畫面。Hierarchy 列出場景物件，Project 對應硬碟檔案，Inspector 顯示選中對象的設定。版面亂掉可用 Layout > Default 還原。
-BA05	場景視角操作	1	basics	navigation;scene view;focus	scene-navigation.svg	滾輪縮放、中鍵平移、右鍵轉視角，沒有中鍵可改用手掌工具拖曳。物件找不到時在 Hierarchy 雙擊它，鏡頭會立刻對焦過去。這些操作只移動視角，物件本身不會改變。
-BA06	移動旋轉縮放工具	1	basics	transform tools;scale;local space	transform-tools.svg	用 Scene 視窗工具列的移動、旋轉、縮放工具改變物件，Inspector 的 Transform 數值會跟著變。縮放要拖中間方塊才是等比例。Local／Global 決定箭頭跟著物件轉，還是對齊世界座標。
-BA07	建立物件與 Transform	1	basics	gameobject;transform	🧊	在 Hierarchy 右鍵可建立 Cube、Plane 等基本物件。每個物件都有 Transform，包含 Position 位置、Rotation 角度、Scale 大小，是所有物件的共通設定。
-BA08	場景存檔	1	basics	save;scene file	💾	Ctrl+S 儲存的是場景，標題列星號代表尚未存檔；專案設定與匯入素材則會自動儲存。特別注意 Play 模式中所做的修改，停止播放後一律還原。
-BA09	Project 視窗與資料夾	1	basics	project window;folder;meta file	🗂️	Project 視窗對應專案的 Assets 資料夾，建議依 Scenes、Scripts、Materials、Prefabs 分類。搬移或改名務必在 Unity 內操作，否則 .meta 關聯中斷會造成 Missing。
-BA10	匯入素材	1	basics	import;asset store	📥	將圖片、模型、音效拖進 Project 視窗即完成匯入。點選檔案後 Inspector 顯示的是匯入設定，修改後需按 Apply；圖片要當 2D 精靈使用需將 Texture Type 改為 Sprite。
-BA11	Material 材質與顏色	1	basics	material;color	🎨	預設材質無法修改，需自行 Create > Material 並指定給物件。同一個 Material 被多個物件共用時，修改會同時影響所有使用它的物件。
-BA12	燈光與天空	1	basics	light;directional light;skybox	💡	Directional Light 模擬太陽，只受角度影響、與位置無關；Point Light 才有位置與照射範圍。天空外觀由 Skybox 控制，可在 Lighting 視窗更換。
-BA13	相機與 Game 視窗	1	basics	camera;align with view	🎥	Game 視窗顯示的是 Main Camera 拍到的畫面。選中相機後按 Ctrl+Shift+F 可讓相機對齊目前的 Scene 視角，快速取景。
-BA14	Play 模式	1	basics	play mode	▶️	Play 模式中修改的數值在停止後會全部還原。需要保留時可用 Copy Component 與 Paste Component Values，並建議設定 Playmode tint 顏色避免誤操作。
-BA15	第一支腳本	2	basics	script;monobehaviour;update	📜	建立 C# Script 時檔名必須與 class 名稱一致。Start 在物件初始化時執行一次，Update 每影格執行一次。腳本必須掛載到物件上才會運作。
-BA16	Console 與錯誤訊息	1	basics	console;debug log	🐞	紅色錯誤會導致遊戲無法進入播放，雙擊訊息可直接跳到出錯的程式碼行。使用 Debug.Log 可輸出變數值，並可勾選 Clear on Play 每次播放自動清空。
-BA17	讓變數出現在 Inspector	2	basics	serializefield;public;inspector	🎛️	public 變數會自動顯示在 Inspector，但也開放給其他腳本修改；改用 private 搭配 [SerializeField] 較安全。注意 Inspector 的數值會覆蓋程式碼中的初始值。
-BA18	Prefab 預製物件	2	basics	prefab	🧬	把物件拖回 Project 視窗即可製成 Prefab，修改 Prefab 會同步更新所有複本。若只想修改單一實例，直接在場景中修改即可，被覆寫的欄位會以粗體顯示。
-BA19	父子關係	1	basics	parent;child;hierarchy	👪	在 Hierarchy 拖曳可建立父子關係，子物件的 Transform 變成相對於父物件，會跟隨父物件移動、旋轉與縮放。父物件 Scale 非 1 時子物件會變形。
-BA20	打包成執行檔	2	basics	build;build settings	🏗️	在 Build Profiles 中必須先將場景加入清單，未加入的場景不會被打包，清單最上方為開場場景。輸出後的 exe 與 _Data 資料夾必須一起保留才能執行。
+BA04	Unity六大基本介面	1	basics	interface;scene view;inspector;console	interface.svg	Unity 編輯器的六個基本介面：Scene 是製作者編輯的畫面，Game 是玩家看到的畫面，Hierarchy 列出場景裡的物件，Project 對應硬碟的 Assets 資料夾，Inspector 顯示選中東西的資料，Console 顯示程式與系統的訊息。版面亂掉可從右上角 Layout 選 Default 還原，也能存成自己的版面；視窗不見了從 Window > General 打開。
+BA05	Scene 場景視窗	1	basics	navigation;scene view;focus;gizmos	scene-navigation.svg	Scene 視窗用滾輪縮放、右鍵旋轉、左鍵選取，右上角座標方塊一點就切到上方、正面等視角，手掌工具可以拖曳平移。物件找不到就在 Hierarchy 雙擊，鏡頭會直接飛過去。眼睛圖示和 Gizmos 只隱藏編輯畫面，不影響遊戲；上方還能切 2D 模式與 Shaded、Wireframe 等繪製模式。
+BA06	Transform 移動旋轉縮放	2	basics	transform;transform tools;scale	transform-tools.svg	每個物件都有 Transform，管位置、旋轉、縮放。欄位可以直接打數字或算式，也能用移動工具拖箭頭，點小方塊就在平面上移動。縮放預設是 1、1、1，打 0 會變扁甚至看不見，鎖頭鎖住就等比例縮放。旋轉的數值是角度，超過 360 或負數會自動換算；第六個工具可以一次做移動、旋轉、縮放。
+BA07	匯入素材	2	basics	import;sprite	📥	音樂、圖片、模型等素材要放在 Project 的 Assets 資料夾，不能放進 Packages，建議先開資料夾分類。匯入可以在 Project 按右鍵選 Import New Asset，或直接把檔案拖進視窗，也能框選多個一起拖。點選素材後 Inspector 會顯示它的匯入設定，可依需求調整，例如圖片要給 UI 用並保留透明；聲音、影片也能在下方直接預覽。
+BA08	Asset Store 與 Package Manager	2	basics	asset store;package manager;import	🛒	Asset Store 是 Unity 的素材商店，用 Unity 帳號登入，可以買素材、模板，也有很多免費資源。找到後按加入 My Assets（付費的要先購買），回到 Unity 在 Package Manager 先 Download、再 Import 才會進專案。Package Manager 還能看 In Project 已裝的內容、Unity Registry 的官方套件、Built-in 內建功能與 Services 服務。
+BA09	Material 材質與顏色	2	basics	material;color	🎨	預設材質無法修改，需自行 Create > Material 並指定給物件。同一個 Material 被多個物件共用時，修改會同時影響所有使用它的物件。
+BA10	燈光與天空	2	basics	light;directional light;skybox	💡	Directional Light 模擬太陽，只受角度影響、與位置無關；Point Light 才有位置與照射範圍。天空外觀由 Skybox 控制，可在 Lighting 視窗更換。
+BA11	相機與 Game 視窗	3	basics	camera;align with view	🎥	Game 視窗顯示的是 Main Camera 拍到的畫面。選中相機後按 Ctrl+Shift+F 可讓相機對齊目前的 Scene 視角，快速取景。
+BA12	第一支腳本	3	basics	script;monobehaviour;update	📜	建立 C# Script 時檔名必須與 class 名稱一致。Start 在物件初始化時執行一次，Update 每影格執行一次。腳本必須掛載到物件上才會運作。
+BA13	Prefab 預製物件	3	basics	prefab	🧬	把物件拖回 Project 視窗即可製成 Prefab，修改 Prefab 會同步更新所有複本。若只想修改單一實例，直接在場景中修改即可，被覆寫的欄位會以粗體顯示。
+BA14	父子關係	3	basics	parent;child;hierarchy	👪	在 Hierarchy 拖曳可建立父子關係，子物件的 Transform 變成相對於父物件，會跟隨父物件移動、旋轉與縮放。父物件 Scale 非 1 時子物件會變形。
+BA15	Animation 關鍵影格動畫	4	basics	animation;keyframe;animation clip	🎞️	不寫程式也能讓物件動：在 Animation 視窗按 Create 建立 Animation Clip，按錄製鍵，在不同時間點移動、旋轉物件就會記成關鍵影格，Curves 可以調快慢。錄完要關掉錄製鍵；動畫會把位置拉回記錄的數值，要整組移動就包一層父物件。
+BA16	UI Canvas 與按鈕	3	basics	ui;canvas;button	🔘	Hierarchy 右鍵 UI 建立文字或按鈕時，會一起建好 Canvas 和 EventSystem：Canvas 是放 UI 的畫布，EventSystem 負責接收點擊。UI 用 Rect Transform，Anchor 決定黏在螢幕哪個角。按鈕在 On Click 綁定要執行的函式；Canvas Scaler 改成 Scale With Screen Size，不同螢幕才會等比例縮放。
+BA17	3D 碰撞	4	basics	rigidbody;collider;trigger	💥	Rigidbody 讓物件受重力和物理影響，Collider 決定碰撞形狀；要碰撞，兩邊都要有 Collider，至少一邊要有 Rigidbody。OnCollisionEnter 可以知道撞到誰；勾 Is Trigger 就變成可穿過的感應區，改用 OnTriggerEnter。有 Rigidbody 的物件不要直接改 Transform 硬搬。
+BA18	2D 碰撞	4	basics	rigidbody 2d;collider 2d;2d	🟦	2D 物理是另一套系統，元件和函式後面都要加 2D：Rigidbody 2D、Box Collider 2D、OnCollisionEnter2D、OnTriggerEnter2D。2D 物件配 3D Collider、或函式忘了寫 2D，都會完全沒反應也不報錯。不想讓角色被撞得轉圈，就在 Rigidbody 2D 勾 Freeze Rotation Z。
+BA19	Tilemap 2D 地圖	4	basics	tilemap;tile palette;2d	🧱	Tilemap 用來快速鋪 2D 關卡：建立 Tilemap 後打開 Tile Palette，把切好格子的圖拖進去變成 Tile，就能用筆刷、橡皮擦、填滿畫地圖。前後層用 Order in Layer 決定，地面加 Tilemap Collider 2D 和 Composite Collider 2D 合成一整塊碰撞。圖片的 Pixels Per Unit 要跟格子大小一致。
+BA20	TMP 中文字型	5	basics	textmeshpro;font asset;chinese font	🔤	TextMeshPro 預設字型沒有中文，打中文會變方框。把中文字型拖進 Project，右鍵 Create > TextMeshPro > Font Asset 做出動態字型，再換到文字物件上；加進預設字型的 Fallback 清單就全部通用。字型要挑可以免費商用的，例如 Noto Sans TC。
+BA21	Animator 狀態機	5	basics	animator;state machine;transition	🔀	一個物件有好幾段動畫時，用 Animator Controller 決定什麼時候播哪一段：每段動畫是一個狀態，Make Transition 拉箭頭連接，再用 Parameters 設定切換條件，程式呼叫 SetTrigger 就會切過去。箭頭預設的 Has Exit Time 會等動畫播完才切換，覺得反應慢就取消。
+BA22	打包成執行檔	4	basics	build;build settings	🏗️	在 Build Profiles 中必須先將場景加入清單，未加入的場景不會被打包，清單最上方為開場場景。輸出後的 exe 與 _Data 資料夾必須一起保留才能執行。
+BA23	新版 Input System	5	basics	input system;input action;keyboard	🎮	Unity 6 新專案預設用新版 Input System，舊的 Input.GetKey 會報錯。先在 InputSystem_Actions 定義 Move、Jump 等動作和它們的按鍵，程式用 InputSystem.actions.FindAction 拿到動作、ReadValue 讀值。之後換按鍵或加手把只改 Actions，不用改程式。
+BA24	ScriptableObject 資料容器	5	basics	scriptableobject;data;createassetmenu	scriptable-object.svg	ScriptableObject 是專門裝資料的檔案：繼承 ScriptableObject、加上 [CreateAssetMenu]，就能在 Project 右鍵建立資料檔，在 Inspector 調數值。多個物件共用同一份，改一次全部生效。Play 模式中改的值停止後不會復原，打包後改了也不會存回檔案，不能當存檔用。

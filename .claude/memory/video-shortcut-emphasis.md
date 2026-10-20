@@ -12,4 +12,4 @@ metadata:
 
 **Why:** 使用者在規劃 BA05/BA06 時明確說「不一定要太強調快捷鍵」；對象是新手，看得到的按鈕比背鍵位好懂。
 
-**How to apply:** 寫腳本、拍攝操作步驟、TSV description 時，先寫按鈕位置；有選單路徑的先講選單（例如 BA13 對齊相機先講 GameObject > Align With View，Ctrl+Shift+F 帶一句），不要把快捷鍵當重點。
+**How to apply:** 寫腳本、拍攝操作步驟、TSV description 時，先寫按鈕位置；有選單路徑的先講選單（例如 BA11 對齊相機先講 GameObject > Align With View，Ctrl+Shift+F 帶一句），不要把快捷鍵當重點。

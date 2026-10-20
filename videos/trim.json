@@ -32,5 +32,26 @@
     "cover_end": 375.2,
     "note": "開頭 OBS 到 0.5s；結尾 375.3s 起是 OBS，兩頭都用投影片蓋",
     "id": "BA05"
+  },
+  "6.mp4": {
+    "start": 0,
+    "cover": 2.5,
+    "cover_end": 321.1,
+    "note": "開頭 0.5s OBS、接著是筆記視窗和 alt-tab 畫面，2.5s 才切到 Unity；結尾 321.2s 起是 OBS，兩頭都用投影片蓋",
+    "id": "BA06"
+  },
+  "8.mp4": {
+    "start": 0,
+    "cover": 1.5,
+    "cover_end": 137.6,
+    "note": "開頭 OBS 到 1.25s，0.84s 就開始講話，用投影片蓋；結尾 137.7s 起切出去（alt-tab），還在講，也用投影片蓋",
+    "id": "BA07"
+  },
+  "9.mp4": {
+    "start": 0,
+    "cover": 0.5,
+    "cover_end": 311.2,
+    "note": "開頭 OBS 到 0.25s；結尾 311.3s 起是 OBS，兩頭都用投影片蓋",
+    "id": "BA08"
   }
 }

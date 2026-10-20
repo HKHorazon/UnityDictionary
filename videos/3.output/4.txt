@@ -1,0 +1,16 @@
+【BA04】Unity六大基本介面
+
+── 標題 ──
+Unity六大基本介面｜Unity短片辭典
+
+── 說明 ──
+Unity 編輯器的六個基本介面：Scene 是製作者編輯的畫面，Game 是玩家看到的畫面，Hierarchy 列出場景裡的物件，Project 對應硬碟的 Assets 資料夾，Inspector 顯示選中東西的資料，Console 顯示程式與系統的訊息。版面亂掉可從右上角 Layout 選 Default 還原，也能存成自己的版面；視窗不見了從 Window > General 打開。
+
+完整條目：https://hkhorazon.github.io/UnityDictionary/?id=BA04
+Unity短片辭典是一本查閱用的圖鑑，每支短片只講一個 Unity 功能。
+
+── 標籤 ──
+Unity, Unity教學, Unity短片辭典, Unity字典, Unity入門, 遊戲開發, 遊戲引擎, Unity Tutorial, game development, Unity介面, Unity編輯器, Hierarchy, Inspector, Scene, Game, interface, scene view, console
+
+── 字幕 ──
+4.srt（上傳時選繁體中文）

@@ -1,1 +1,2 @@
 - [影片不強調快捷鍵](video-shortcut-emphasis.md) — 操作以按鈕／滑鼠為主，快捷鍵最多帶一句
+- [難度規劃到 Lv10](difficulty-scale.md) — 目前只用到 Lv5，Lv5 不是最高

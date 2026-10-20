@@ -1,0 +1,16 @@
+【BA07】匯入素材
+
+── 標題 ──
+匯入素材｜Unity短片辭典
+
+── 說明 ──
+音樂、圖片、模型等素材要放在 Project 的 Assets 資料夾，不能放進 Packages，建議先開資料夾分類。匯入可以在 Project 按右鍵選 Import New Asset，或直接把檔案拖進視窗，也能框選多個一起拖。點選素材後 Inspector 會顯示它的匯入設定，可依需求調整，例如圖片要給 UI 用並保留透明；聲音、影片也能在下方直接預覽。
+
+完整條目：https://hkhorazon.github.io/UnityDictionary/?id=BA07
+Unity短片辭典是一本查閱用的圖鑑，每支短片只講一個 Unity 功能。
+
+── 標籤 ──
+Unity, Unity教學, Unity短片辭典, Unity字典, Unity入門, 遊戲開發, 遊戲引擎, Unity Tutorial, game development, Unity匯入素材, Unity素材, Import New Asset, Unity圖片, Unity音效, FBX, import, sprite
+
+── 字幕 ──
+8.srt（上傳時選繁體中文）
