@@ -71,6 +71,7 @@
   "rigidbody 2d":     { "label": "2D 剛體",    "isTopic": false },
   "collider 2d":      { "label": "2D 碰撞體",  "isTopic": false },
   "transition":       { "label": "狀態轉換",   "isTopic": false },
+  "projection":       { "label": "投影方式",   "isTopic": false },
   "tilemap":          { "label": "瓦片地圖",   "isTopic": false },
   "tile palette":     { "label": "瓦片調色盤", "isTopic": false },
   "2d":               { "label": "2D",         "isTopic": false },

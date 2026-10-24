@@ -1,4 +1,4 @@
-"""產生每支影片的上傳資料（標題／說明／標籤）到 3.output/*.txt。
+"""產生每支影片的上傳資料（標題／說明／標籤）到 3.output/N/N.txt。
 
     python videos/meta.py
 
@@ -100,7 +100,8 @@ def main() -> None:
 ── 字幕 ──
 {clip['stem']}.srt（上傳時選繁體中文）
 """
-        dst = OUT / (clip["stem"] + ".txt")
+        dst = OUT / clip["stem"] / (clip["stem"] + ".txt")
+        dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_text(body, encoding="utf-8")
         print(f"→ {dst}")
 

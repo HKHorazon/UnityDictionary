@@ -13,4 +13,4 @@ Unity短片辭典是一本查閱用的圖鑑，每支短片只講一個 Unity �
 Unity, Unity教學, Unity短片辭典, Unity字典, Unity入門, 遊戲開發, 遊戲引擎, Unity Tutorial, game development, Unity Asset Store, Unity素材, Package Manager, Unity套件, asset store, import
 
 ── 字幕 ──
-9.srt（上傳時選繁體中文）
+8.srt（上傳時選繁體中文）

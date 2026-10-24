@@ -1,0 +1,16 @@
+【BA11】相機與 Game 視窗
+
+── 標題 ──
+相機與 Game 視窗｜Unity短片辭典
+
+── 說明 ──
+Game 視窗顯示的是 Main Camera 拍到的畫面。場景裡可以有好幾台相機，標成 MainCamera 的為主。選中相機用 GameObject > Align With View，就能直接對齊目前的 Scene 視角。沒有物體的地方可以用天空或純色當背景；Projection 透視時調 FOV，正交時調框框大小；太靠近相機（預設 0.3 以內）的東西會拍不到。
+
+完整條目：https://hkhorazon.github.io/UnityDictionary/?id=BA11
+Unity短片辭典是一本查閱用的圖鑑，每支短片只講一個 Unity 功能。
+
+── 標籤 ──
+Unity, Unity教學, Unity短片辭典, Unity字典, Unity入門, 遊戲開發, 遊戲引擎, Unity Tutorial, game development, camera, align with view, projection
+
+── 字幕 ──
+11.srt（上傳時選繁體中文）

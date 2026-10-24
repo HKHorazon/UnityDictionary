@@ -4,7 +4,7 @@
 videos/
   1.raw/       OBS 錄下的原始檔（*.mkv），不要動它
   2.process/   轉錄的中間檔（*.wav、*.words.json），可以隨時刪
-  3.output/    成品：*.mp4 + *.srt + *.txt，上傳 YouTube 就用這一包
+  3.output/    成品，每支影片一個資料夾 N/：N.mp4 + N.srt + N.txt + N-card.png（投影片），上傳 YouTube 就用這一包
   trim.json    每支影片的去頭去尾秒數 + 對應的條目 ID
   build.py     去頭去尾 + 音量正規化 + 開頭標題投影片
   card.py      產標題投影片（build.py 會自動叫，單獨跑可以先看圖）
@@ -33,7 +33,7 @@ videos/
    python videos/build.py 4.mkv      # 只做指定的
    ```
 
-   輸出 `3.output/4.mp4`。錄出來通常只有 -43 LUFS，YouTube 標準是 -14，
+   輸出 `3.output/4/4.mp4`，投影片也會複製一份 `3.output/4/4-card.png`。錄出來通常只有 -43 LUFS，YouTube 標準是 -14，
    差快 30 dB，一定要跑這步。
 
    有 `id` 的影片開頭會加 4 秒標題投影片（標題＋說明，文字取自
@@ -59,7 +59,7 @@ videos/
    `av<16` 不能拿掉：PyAV 新版拿掉了 faster-whisper 會用到的參數，
    會噴 `open() got an unexpected keyword argument 'metadata_errors'`。
 
-   輸出 `3.output/4.srt`。**這是草稿，一定要校對**：whisper 會把 Unity 專有
+   輸出 `3.output/4/4.srt`。**這是草稿，一定要校對**：whisper 會把 Unity 專有
    名詞聽錯，聽不清楚的地方也會自己編一個相近的詞出來。
 
 5. **上傳資料** — 產生標題／說明／標籤：
@@ -68,7 +68,7 @@ videos/
    python videos/meta.py
    ```
 
-   輸出 `3.output/4.txt`，直接複製貼上 YouTube。文案的來源是
+   輸出 `3.output/4/4.txt`，直接複製貼上 YouTube。文案的來源是
    `design/sheet-rows-basics.tsv`，要改文字改那裡，不要改 `meta.py`。
 
 6. **上傳 YouTube** — 影片檔一定要自己在 Studio 拖上去，**不要用 API 傳**：
@@ -77,7 +77,7 @@ videos/
    [YouTube API Services Audit](https://support.google.com/youtube/contact/yt_api_form)，
    審核要幾週到幾個月，跟 OAuth 的「發布狀態」是兩回事，別搞混。
 
-   拖 `3.output/*.mp4` 進 Studio，先存成「私人」就好，標題不用改
+   拖 `3.output/*/*.mp4` 進 Studio，先存成「私人」就好，標題不用改
    （保持預設的 `1`、`2`、`3`，下一步才認得出來）。
 
 7. **抓影片 ID** — 不用自己去網址列抄：

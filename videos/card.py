@@ -111,6 +111,132 @@ CUSTOM: dict[str, tuple[str, list[str]]] = {
         "<b>Package Manager</b>：In Project、Unity Registry、My Assets",
         "<b>Built-in／Services</b>：內建功能與雲端存檔等服務",
     ]),
+    "BA10": ("燈光與天空", [
+        "<b>Directional Light</b>：直射光模擬太陽，只看角度不看位置",
+        "<b>Point Light</b>：點光源，從一點照亮附近",
+        "<b>Spot Light</b>：探照燈，照出一個錐形",
+        "<b>Area Light</b>：區域光，要烘焙才看得到",
+        "<b>天空的光</b>：Window > Rendering > Lighting 調環境光",
+        "<b>Light Explorer</b>：所有燈光集中一起調",
+    ]),
+    "BA09": ("Material 材質球", [
+        "<b>建立</b>：Project 右鍵 Create > Material",
+        "<b>Shader</b>：決定材質怎麼畫，URP 預設用 Lit",
+        "<b>顏色與貼圖</b>：調 Base Map 的顏色，或放上圖片",
+        "<b>套用</b>：拖到場景物件、Hierarchy 或 Inspector 上",
+        "<b>共用</b>：同一個材質會一起改，要不同顏色就再建一個",
+    ]),
+    "BA11": ("相機與 Game 視窗", [
+        "<b>Main Camera</b>：它拍到的就是玩家看到的畫面",
+        "<b>多台相機</b>：可以有好幾台，標成 MainCamera 的為主",
+        "<b>Align With View</b>：相機直接對齊目前的 Scene 視角",
+        "<b>背景</b>：沒東西的地方可以用天空或純色",
+        "<b>Projection</b>：透視調 FOV，正交調框框大小",
+        "<b>最近距離</b>：太靠近相機的東西拍不到（預設 0.3）",
+    ]),
+}
+
+# 還沒錄的章節先放草稿，給錄影時參考要講什麼；錄完照影片實際內容寫進 CUSTOM 蓋過去
+DRAFT: dict[str, tuple[str, list[str]]] = {
+    "BA12": ("第一支腳本", [
+        "<b>建立</b>：Project 右鍵 Create > MonoBehaviour Script",
+        "<b>檔名＝class 名</b>：改名要兩邊一起改",
+        "<b>Start</b>：物件出現時跑一次",
+        "<b>Update</b>：每一格畫面都跑一次",
+        "<b>掛上物件</b>：沒掛在物件上的腳本不會執行",
+        "<b>Debug.Log</b>：在 Console 印出訊息",
+    ]),
+    "BA13": ("Prefab 預製物件", [
+        "<b>製作</b>：把 Hierarchy 的物件拖回 Project",
+        "<b>藍色</b>：名字變藍就是 Prefab",
+        "<b>大量複製</b>：從 Project 拖出來，都是同一個模子",
+        "<b>改 Prefab</b>：雙擊進入編輯，所有複本一起變",
+        "<b>單獨修改</b>：在場景上直接改，改過的欄位變粗體",
+    ]),
+    "BA14": ("父子關係", [
+        "<b>建立</b>：在 Hierarchy 把 A 拖到 B 上",
+        "<b>相對座標</b>：子物件的 Transform 相對於父物件",
+        "<b>跟著動</b>：父物件移動、旋轉、縮放，子物件跟著走",
+        "<b>空物件當資料夾</b>：把零件收在一起",
+        "<b>小心縮放</b>：父物件 Scale 不是 1，子物件會變形",
+    ]),
+    "BA15": ("Animation 動畫", [
+        "<b>Animation 視窗</b>：Window > Animation > Animation",
+        "<b>Create</b>：建立 Animation Clip，自動加上 Animator",
+        "<b>錄製</b>：在不同時間點改數值，記成關鍵影格",
+        "<b>Curves</b>：調整動作的快慢曲線",
+        "<b>關掉錄製</b>：不然之後的修改也會被錄進去",
+        "<b>位置被拉回</b>：包一層父物件再移動",
+    ]),
+    "BA16": ("UI Canvas 與按鈕", [
+        "<b>建立 UI</b>：右鍵 UI，自動建好 Canvas、EventSystem",
+        "<b>Canvas</b>：放 UI 的畫布，切 2D 模式比較好看",
+        "<b>Rect Transform</b>：Anchor 決定黏在螢幕哪個角",
+        "<b>Button</b>：On Click 綁定要執行的函式",
+        "<b>Canvas Scaler</b>：Scale With Screen Size 等比例縮放",
+    ]),
+    "BA17": ("3D 碰撞", [
+        "<b>Rigidbody</b>：讓物件受重力和物理影響",
+        "<b>Collider</b>：決定碰撞的形狀",
+        "<b>碰撞條件</b>：兩邊都要 Collider，一邊要 Rigidbody",
+        "<b>OnCollisionEnter</b>：撞到時執行，知道撞到誰",
+        "<b>Is Trigger</b>：可穿過的感應區，用 OnTriggerEnter",
+        "<b>不要硬搬</b>：有 Rigidbody 就不要直接改 Transform",
+    ]),
+    "BA18": ("2D 碰撞", [
+        "<b>2D 元件</b>：Rigidbody 2D、Box Collider 2D",
+        "<b>2D 函式</b>：OnCollisionEnter2D、OnTriggerEnter2D",
+        "<b>不能混用</b>：2D 和 3D 物理不會互相碰撞",
+        "<b>沒反應也不報錯</b>：先檢查元件和函式有沒有 2D",
+        "<b>Freeze Rotation Z</b>：角色不會被撞得轉圈",
+    ]),
+    "BA19": ("Tilemap 2D 地圖", [
+        "<b>建立</b>：2D Object > Tilemap > Rectangular",
+        "<b>Tile Palette</b>：把切好的圖拖進去變成 Tile",
+        "<b>畫地圖</b>：筆刷、橡皮擦、填滿、框選",
+        "<b>分層</b>：背景、地面分開，Order in Layer 決定前後",
+        "<b>碰撞</b>：Tilemap Collider 2D + Composite Collider 2D",
+        "<b>Pixels Per Unit</b>：要跟格子大小一致",
+    ]),
+    "BA20": ("TMP 中文字型", [
+        "<b>方框</b>：預設字型 LiberationSans 沒有中文",
+        "<b>中文字型</b>：挑可以商用的，例如 Noto Sans TC",
+        "<b>Font Asset</b>：字型右鍵 Create > TextMeshPro > Font Asset",
+        "<b>動態字型</b>：用到哪個字就自動加進去",
+        "<b>Fallback</b>：加進預設字型，所有文字都能顯示中文",
+        "<b>授權</b>：不要直接用 Windows 的微軟正黑體",
+    ]),
+    "BA21": ("Animator 狀態機", [
+        "<b>Animator Controller</b>：管理多段動畫的切換",
+        "<b>狀態</b>：每段動畫一個，橘色是預設",
+        "<b>Make Transition</b>：拉箭頭連接兩個狀態",
+        "<b>Parameters</b>：用 Trigger、Bool 當切換條件",
+        "<b>SetTrigger</b>：從程式觸發切換",
+        "<b>Has Exit Time</b>：等播完才切換，反應慢就取消",
+    ]),
+    "BA22": ("打包成執行檔", [
+        "<b>Build Profiles</b>：File > Build Profiles（舊版叫 Build Settings）",
+        "<b>場景清單</b>：要玩的場景都要加進去",
+        "<b>開場場景</b>：清單最上面那個",
+        "<b>選平台</b>：Windows、Android、WebGL…",
+        "<b>Build</b>：輸出到一個空資料夾",
+        "<b>一起帶走</b>：exe 和 _Data 資料夾缺一不可",
+    ]),
+    "BA23": ("新版 Input System", [
+        "<b>新舊系統</b>：Unity 6 預設新版，Input.GetKey 會報錯",
+        "<b>Input Actions</b>：先定義動作，再綁按鍵",
+        "<b>Move／Jump</b>：InputSystem_Actions 已經內建",
+        "<b>FindAction</b>：程式拿到動作，用 ReadValue 讀值",
+        "<b>換鍵免改程式</b>：只改 Actions，手把也能用",
+    ]),
+    "BA24": ("ScriptableObject", [
+        "<b>資料檔</b>：類別繼承 ScriptableObject",
+        "<b>CreateAssetMenu</b>：讓 Create 選單建得出來",
+        "<b>Inspector 調數值</b>：企劃不用碰程式",
+        "<b>共用</b>：多個物件用同一份，改一次全部生效",
+        "<b>Play 中改值不復原</b>：跟一般元件相反",
+        "<b>不能當存檔</b>：打包後改了不會存回去",
+    ]),
 }
 
 
@@ -120,7 +246,7 @@ def render(row: dict) -> Path:
     out = CARDS / f"{row['id']}.png"
     svg = THUMBS / row["thumb"]
     thumb = f'<img src="{svg.as_uri()}">' if row["thumb"].endswith(".svg") and svg.exists() else ""
-    title, items = CUSTOM.get(row["id"]) or (
+    title, items = CUSTOM.get(row["id"]) or DRAFT.get(row["id"]) or (
         row["title"], [html.escape(s) for s in row["description"].split("。") if s.strip()])
     body = "<ol>" + "".join(f"<li>{i}</li>" for i in items) + "</ol>"
     page = PAGE.format(thumb=thumb,

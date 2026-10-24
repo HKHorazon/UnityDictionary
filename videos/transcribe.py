@@ -1,4 +1,4 @@
-"""把 videos/3.output/*.mp4 轉成同名的 *.srt（逐字稿草稿，仍需人工校對）。
+"""把 videos/3.output/N/N.mp4 轉成同資料夾的 N.srt（逐字稿草稿，仍需人工校對）。
 
 用法：
     python videos/transcribe.py             # 轉 3.output 底下全部影片
@@ -225,7 +225,7 @@ def ts(seconds: float) -> str:
 def main() -> None:
     PROC.mkdir(exist_ok=True)
     names = sys.argv[1:]
-    videos = [OUT / n for n in names] if names else sorted(OUT.glob("*.mp4"))
+    videos = [OUT / Path(n).stem / n for n in names] if names else sorted(OUT.glob("*/*.mp4"))
     if not videos:
         print("3.output/ 裡沒有影片，先跑 build.py")
         return
@@ -237,7 +237,7 @@ def main() -> None:
             f"{i}\n{ts(start)} --> {ts(end)}\n{text}\n"
             for i, (start, end, text) in enumerate(cues, 1)
         )
-        srt = OUT / (video.stem + ".srt")
+        srt = video.with_suffix(".srt")
         srt.write_text(body, encoding="utf-8")
         for start, _, text in cues:
             print(f"  [{start:6.1f}] {text}", flush=True)

@@ -13,7 +13,7 @@ API 專案，用 videos.insert 傳的片會被永久鎖成私人，事後在 Stu
 上傳「之後」的雜事：
 
   1. videos.update   套上 meta.py 算出來的標題／說明／標籤／分類／語言
-  2. captions.insert 上傳 3.output/*.srt（同語言的字幕軌已存在就改用 update）
+  2. captions.insert 上傳 3.output/N/N.srt（同語言的字幕軌已存在就改用 update）
   3. playlistItems.insert 加進播放清單「Unity短片辭典」（沒有就自動建）
   4. videos.update   把隱私狀態改成公開（會先列清單問過你才動）
   5. spreadsheets.values 把已上傳的條目寫進網站在讀的那張 Google Sheet
@@ -428,7 +428,7 @@ def main() -> None:
         try:
             push_meta(yt, video_id, build_meta(entry_id, rows[entry_id]))
             print("  標題／說明／標籤已套用")
-            srt = OUT / f"{clip['stem']}.srt"
+            srt = OUT / clip["stem"] / f"{clip['stem']}.srt"
             print("  " + (push_caption(yt, video_id, srt) if srt.exists()
                           else f"! 找不到 {srt}，字幕跳過"))
             print("  " + add_to_playlist(yt, playlist_id, video_id))

@@ -1,4 +1,6 @@
-"""去頭去尾 + 音量正規化 + 開頭標題投影片，1.raw/*.mkv|mp4 → 3.output/*.mp4。
+"""去頭去尾 + 音量正規化 + 開頭標題投影片，1.raw/N.mkv|mp4 → 3.output/N/N.mp4。
+
+每支影片一個資料夾 3.output/N/，成品影片、字幕、上傳資料、投影片（N-card.png）都放在裡面。
 
     python videos/build.py            # 全部
     python videos/build.py 1.mkv      # 只做指定的
@@ -7,11 +9,14 @@
 trim.json 有 id 的才會加投影片：先靜音放 CARD_SECONDS 秒，再接影片。
 有 cover 的話投影片會繼續蓋在影片上直到原始檔的 cover 秒（聲音照放），
 拿來遮開頭露出的 OBS 畫面；cover_end 則是從那一秒起淡入蓋到結尾，遮結尾的 OBS。
+cuts 是要剪掉的中間片段 [[開始, 結束], ...]（原始檔時間軸），畫面和聲音一起剪；
+剪完字幕時間軸要跟著往前推，字幕要重轉或手動調整。
 
 聲音先用 DeepFilterNet 去掉鍵盤聲和底噪（整支原始檔做一次，快取在 2.process/*.denoised.wav），
 再做音量正規化。原始檔換過就把快取刪掉重做。
 """
 import csv
+import shutil
 import json
 import subprocess
 import sys
@@ -71,7 +76,9 @@ def main() -> None:
         start, end = float(cfg.get("start", 0)), cfg.get("end")
         audio = denoise(src)
         m = measure(audio, start, end)
-        dst = OUT / (src.stem + ".mp4")
+        folder = OUT / src.stem
+        folder.mkdir(parents=True, exist_ok=True)
+        dst = folder / (src.stem + ".mp4")
         span = f"{start}s → {end or '結尾'}"
         print(f"{src.name}: 保留 {span}，{m['input_i']} LUFS → -14 LUFS", flush=True)
         norm = (f"loudnorm={TARGET}:"
@@ -82,7 +89,7 @@ def main() -> None:
         clip = [*cut, "-i", str(src)]
 
         if cfg.get("id") in rows:
-            card = str(render(rows[cfg["id"]]))
+            card = str(shutil.copy(render(rows[cfg["id"]]), folder / f"{src.stem}-card.png"))
             # 蓋在影片上的那段：到 cover 為止全不透明，之後 FADE 秒淡出；沒 cover 就只有淡出
             over = max(float(cfg.get("cover", start)) - start, 0) + FADE
             same = "fps=60,scale=1920:1080,setsar=1,format=yuv420p"
@@ -101,15 +108,18 @@ def main() -> None:
                 tail = (f"[3:v]format=rgba,fade=t=in:d={FADE}:alpha=1,setpts=PTS+{at}/TB[e];"
                         f"[m0][e]overlay=eof_action=pass[m1];")
             ai = inputs.count("-i")            # 去噪後的聲音接在最後一個輸入
+            drop = "+".join(f"between(t,{a - start},{b - start})" for a, b in cfg.get("cuts", []))
+            vcut = f",select='not({drop})',setpts=N/FRAME_RATE/TB" if drop else ""
+            acut = f",aselect='not({drop})',asetpts=N/SR/TB" if drop else ""
             inputs += [*cut, "-i", str(audio)]
             graph = (
                 f"[0:v]{same}[v];"
                 f"[2:v]format=rgba,fade=t=out:st={over - FADE}:d={FADE}:alpha=1[o];"
                 f"[v][o]overlay=eof_action=pass[m0];{tail or '[m0]null[m1];'}"
-                f"[m1]{same}[main];"
+                f"[m1]{same}{vcut}[main];"
                 f"[1:v]{same}[pre];"
                 f"anullsrc=r=48000:cl=stereo,atrim=duration={CARD_SECONDS}[sil];"
-                f"[{ai}:a]{norm},aresample=48000,aformat=channel_layouts=stereo[a];"
+                f"[{ai}:a]{norm},aresample=48000,aformat=channel_layouts=stereo{acut}[a];"
                 f"[pre][sil][main][a]concat=n=2:v=1:a=1[vout][aout]"
             )
             filters = ["-filter_complex", graph, "-map", "[vout]", "-map", "[aout]"]
